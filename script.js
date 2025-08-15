@@ -46,6 +46,26 @@ const tutorials = [
   }
 ];
 
+// Função que escolhe o ícone com base no título ou categoria
+function getIconClass(title, categories) {
+  title = title.toLowerCase();
+  const cat = categories;
+
+  if (cat.includes("relatorios") || title.includes("relatório") || title.includes("relatorio")) return "fas fa-chart-line";
+  if (cat.includes("erros") || title.includes("erro") || title.includes("problema")) return "fas fa-exclamation-triangle";
+  if (cat.includes("wcompany") || title.includes("wcompany")) return "fas fa-building";
+  if (cat.includes("icompany") || title.includes("icompany")) return "fas fa-laptop-code";
+  if (title.includes("estoque") || title.includes("inventário") || title.includes("inventario")) return "fas fa-boxes";
+  if (title.includes("venda") || title.includes("faturamento")) return "fas fa-cash-register";
+  if (title.includes("nota") || title.includes("nf")) return "fas fa-file-invoice";
+  if (title.includes("cadastro") || title.includes("usuário") || title.includes("usuario")) return "fas fa-user-plus";
+  if (title.includes("atendimento")) return "fas fa-headset";
+  if (title.includes("financeiro")) return "fas fa-wallet";
+  
+  // Ícone padrão, se não encontrar nenhuma palavra
+  return "fas fa-book";
+}
+
 // Carregar tutoriais na página
 function loadTutorials() {
   const grid = document.getElementById("tutorialGrid");
@@ -68,6 +88,9 @@ function loadTutorials() {
     }).join("");
 
     card.innerHTML = `
+      <div class="tutorial-icon">
+        <i class="${getIconClass(tutorial.title, tutorial.categories)}"></i>
+      </div>
       <img src="${tutorial.image}" alt="${tutorial.title}">
       <div class="tutorial-content">
         <h3 class="tutorial-title">${tutorial.title}</h3>
