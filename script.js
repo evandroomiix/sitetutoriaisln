@@ -87,18 +87,27 @@ function loadTutorials() {
       return `<span class="tutorial-tag">${label}</span>`;
     }).join("");
 
-    card.innerHTML = `
-      <div class="tutorial-icon">
-        <i class="${getIconClass(tutorial.title, tutorial.categories)}"></i>
-      </div>
-      <img src="${tutorial.image}" alt="${tutorial.title}">
-      <div class="tutorial-content">
-        <h3 class="tutorial-title">${tutorial.title}</h3>
-        <p class="tutorial-description">${tutorial.description}</p>
-        <div class="tutorial-tags">${tagsHTML}</div>
-        <a href="${tutorial.link}" class="tutorial-link" target="_blank">Acessar Tutorial</a>
-      </div>
-    `;
+// Verifica se tem imagem válida
+const hasImage = tutorial.image && tutorial.image.trim() !== "";
+const iconClass = getIconClass(tutorial.title, tutorial.categories);
+
+card.innerHTML = `
+  <div class="tutorial-icon">
+    <i class="${iconClass}"></i>
+  </div>
+  ${hasImage 
+    ? `<img src="${tutorial.image}" alt="${tutorial.title}">`
+    : `<div class="tutorial-placeholder" style="background-color: var(--primary-green); color: white; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+         <i class="${iconClass.replace('fas', 'far')}"></i>
+       </div>`
+  }
+  <div class="tutorial-content">
+    <h3 class="tutorial-title">${tutorial.title}</h3>
+    <p class="tutorial-description">${tutorial.description}</p>
+    <div class="tutorial-tags">${tagsHTML}</div>
+    <a href="${tutorial.link}" class="tutorial-link" target="_blank">Acessar Tutorial</a>
+  </div>
+`;
 
     grid.appendChild(card);
   });
