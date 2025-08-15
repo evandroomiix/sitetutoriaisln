@@ -241,3 +241,33 @@ header h1 {
 .tutorial-link:hover {
   background-color: var(--secondary-green);
 }
+
+/* Ícone no canto superior da imagem */
+.tutorial-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: white;
+  color: var(--primary-green);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.dark-mode .tutorial-icon {
+  background-color: #1e1e1e;
+  border-color: #333;
+  color: var(--secondary-green);
+}
+
+.tutorial-card {
+  position: relative; /* necessário para o ícone ficar posicionado */
+  overflow: hidden;
+}
