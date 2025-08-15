@@ -47,9 +47,8 @@ const tutorials = [
   {
     title: "Registro de Inventário (Relatório de Estoque)",
     description: "Passo a passo para gerar o relatório de estoque com os filtros corretos no sistema.",
-    image: "assets/tutorial-inventario.jpg",
-    link: "assets/ROTINA - REGISTRO DE INVENTÁRIO (RELATÓRIO DE ESTOQUE).pdf", // opcional: link para baixar
-    categories: ["relatorios", "estoque"]
+    link: "assets/ROTINA-REGISTRODEINVENTÁRIO.pdf", // opcional: link para baixar
+    categories: ["relatorios", "estoque", "icompany"]
   }
 ];
 
