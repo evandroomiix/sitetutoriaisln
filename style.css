@@ -288,6 +288,25 @@ header h1 {
 
 /* Ajuste para modo escuro */
 .dark-mode .footer {
+
+  /* Placeholder quando não há imagem */
+.tutorial-placeholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--primary-green);
+  color: white;
+  font-size: 3rem;
+}
+
+.tutorial-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  margin: 0;
+}
   background-color: #006400; /* Verde escuro um pouco mais suave */
   color: #d4edc9;
 }
