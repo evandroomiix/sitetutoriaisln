@@ -44,6 +44,13 @@ const tutorials = [
     link: "https://exemplo.com/fornecedor",
     categories: ["icompany"]
   }
+  {
+    title: "Registro de Inventário (Relatório de Estoque)",
+    description: "Passo a passo para gerar o relatório de estoque com os filtros corretos no sistema.",
+    image: "assets/tutorial-inventario.jpg",
+    link: "assets/ROTINA - REGISTRO DE INVENTÁRIO (RELATÓRIO DE ESTOQUE).pdf", // opcional: link para baixar
+    categories: ["relatorios", "estoque"]
+  }
 ];
 
 // Função que escolhe o ícone com base no título ou categoria
