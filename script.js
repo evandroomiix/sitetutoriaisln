@@ -43,7 +43,7 @@ const tutorials = [
     image: "assets/fornecedor.jpg",
     link: "https://exemplo.com/fornecedor",
     categories: ["icompany"]
-  }
+  },
   {
     title: "Registro de Inventário (Relatório de Estoque)",
     description: "Passo a passo para gerar o relatório de estoque com os filtros corretos no sistema.",
