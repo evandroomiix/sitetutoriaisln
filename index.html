@@ -2,292 +2,43 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tutoriais Lojas Nordestina</title>
-  <style>
-    :root {
-      --primary-green: #008000;
-      --secondary-green: #2ECC71;
-      --white: #FFFFFF;
-      --text-color: #333;
-      --bg-light: #f9f9f9;
-      --bg-dark: #121212;
-      --text-dark: #f5f5f5;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-light);
-      color: var(--text-color);
-      transition: background-color 0.3s ease, color 0.3s ease;
-      min-height: 100vh;
-    }
-
-    body.dark-mode {
-      background-color: var(--bg-dark);
-      color: var(--text-dark);
-    }
-
-    header {
-      background-color: var(--primary-green);
-      color: white;
-      text-align: center;
-      padding: 2rem 1rem;
-      border-bottom: 4px solid var(--secondary-green);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      border-radius: 16px;
-      margin-bottom: 1.5rem;
-    }
-
-    header img {
-      max-width: 200px;
-      height: auto;
-      margin-bottom: 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .search-box {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
-    }
-
-    .search-box input {
-      padding: 0.8rem;
-      width: 300px;
-      border: none;
-      border-radius: 20px;
-      font-size: 1rem;
-      outline: none;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .search-box button {
-      padding: 0.8rem 1.5rem;
-      background-color: var(--secondary-green);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      margin-left: 0.5rem;
-      font-weight: bold;
-    }
-
-    .categories {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      justify-content: center;
-    }
-
-    .category {
-      background-color: var(--primary-green);
-      color: white;
-      padding: 0.8rem 1.5rem;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .category:hover {
-      background-color: var(--secondary-green);
-      transform: scale(1.05);
-    }
-
-    .tutorial-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
-
-    .tutorial-card {
-      background-color: var(--white);
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-      border: 1px solid var(--primary-green);
-    }
-
-    .tutorial-card:hover {
-      transform: translateY(-5px);
-    }
-
-    .tutorial-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-    }
-
-    .tutorial-content {
-      padding: 1rem;
-    }
-
-    .tutorial-title {
-      font-size: 1.1rem;
-      font-weight: bold;
-      margin: 0;
-      color: var(--primary-green);
-    }
-
-    .tutorial-description {
-      margin: 0.5rem 0;
-      color: #555;
-    }
-
-    .tutorial-link {
-      color: var(--secondary-green);
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .tutorial-link:hover {
-      text-decoration: underline;
-    }
-
-    .theme-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: var(--primary-green);
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-
-    .theme-toggle.dark-mode {
-      background-color: var(--secondary-green);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Toggle Modo Escuro -->
-  <button class="theme-toggle" onclick="toggleDarkMode()">Modo Escuro</button>
+  <!-- Botão de modo escuro -->
+  <button id="themeToggle"><i class="fas fa-moon"></i></button>
 
   <header>
-    <img src="https://via.placeholder.com/300x100?text=LOJAS+NORDESTINA" alt="Logo Lojas Nordestina" />
+    <img src="./LOGO.png" alt="Logo Lojas Nordestina" id="logo" />
     <h1>Tutoriais Corporativos</h1>
   </header>
 
   <div class="container">
+    <!-- Barra de busca -->
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Buscar tópicos..." />
-      <button onclick="filterTutorials()">Buscar</button>
+      <input type="text" id="searchInput" placeholder="Buscar tutoriais..." />
+      <button onclick="filterTutorials()"><i class="fas fa-search"></i></button>
     </div>
 
+    <!-- Menu de categorias -->
     <div class="categories">
-      <div class="category" onclick="filterByCategory('atendimento')">Atendimento</div>
-      <div class="category" onclick="filterByCategory('vendas')">Vendas</div>
-      <div class="category" onclick="filterByCategory('estoque')">Estoque</div>
-      <div class="category" onclick="filterByCategory('treinamento')">Treinamento</div>
-      <div class="category" onclick="filterByCategory('financeiro')">Financeiro</div>
+      <div class="category active" data-filter="all">Todos</div>
+      <div class="category" data-filter="relatorios">Relatórios</div>
+      <div class="category" data-filter="erros">Erros</div>
+      <div class="category" data-filter="wcompany">WCompany</div>
+      <div class="category" data-filter="icompany">ICompany</div>
     </div>
 
+    <!-- Grade de tutoriais -->
     <div class="tutorial-grid" id="tutorialGrid">
-      <!-- Exemplo de tutorial -->
-      <div class="tutorial-card">
-        <img src="https://via.placeholder.com/300x180?text=Video+Tutorial" alt="Tutorial" />
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Como atender o cliente com excelência</h3>
-          <p class="tutorial-description">Guia completo sobre atendimento ao cliente com foco em empatia e eficiência.</p>
-          <a href="#" class="tutorial-link">Ver Tutorial</a>
-        </div>
-      </div>
-
-      <div class="tutorial-card">
-        <img src="https://via.placeholder.com/300x180?text=PDF+Manual" alt="Manual" />
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Manual de Vendas - Novo Produto</h3>
-          <p class="tutorial-description">PDF com informações técnicas e estratégias de venda.</p>
-          <a href="#" class="tutorial-link">Baixar PDF</a>
-        </div>
-      </div>
-
-      <div class="tutorial-card">
-        <img src="https://via.placeholder.com/300x180?text=Video+Estoque" alt="Estoque" />
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Como fazer inventário de estoque</h3>
-          <p class="tutorial-description">Passo a passo para realizar o inventário com precisão.</p>
-          <a href="#" class="tutorial-link">Assistir Vídeo</a>
-        </div>
-      </div>
-
-      <div class="tutorial-card">
-        <img src="https://via.placeholder.com/300x180?text=Curso+Online" alt="Curso" />
-        <div class="tutorial-content">
-          <h3 class="tutorial-title">Treinamento: Uso do CRM</h3>
-          <p class="tutorial-description">Aprenda a usar o sistema CRM da empresa para melhorar o atendimento.</p>
-          <a href="#" class="tutorial-link">Iniciar Curso</a>
-        </div>
-      </div>
+      <!-- Os tutoriais serão gerados aqui pelo JS -->
     </div>
   </div>
 
-  <script>
-    // Toggle modo escuro
-    function toggleDarkMode() {
-      const body = document.body;
-      body.classList.toggle('dark-mode');
-      const btn = document.querySelector('.theme-toggle');
-      if (body.classList.contains('dark-mode')) {
-        btn.textContent = 'Modo Claro';
-        btn.style.backgroundColor = '#2ECC71';
-      } else {
-        btn.textContent = 'Modo Escuro';
-        btn.style.backgroundColor = '#008000';
-      }
-    }
-
-    // Filtrar por categoria
-    function filterByCategory(category) {
-      const cards = document.querySelectorAll('.tutorial-card');
-      cards.forEach(card => {
-        card.style.display = 'none';
-      });
-
-      const filteredCards = document.querySelectorAll(`.tutorial-card[data-category="${category}"]`);
-      filteredCards.forEach(card => {
-        card.style.display = 'block';
-      });
-    }
-
-    // Filtrar por busca
-    function filterTutorials() {
-      const input = document.getElementById('searchInput').value.toLowerCase();
-      const cards = document.querySelectorAll('.tutorial-card');
-
-      cards.forEach(card => {
-        const title = card.querySelector('.tutorial-title').textContent.toLowerCase();
-        const desc = card.querySelector('.tutorial-description').textContent.toLowerCase();
-
-        if (title.includes(input) || desc.includes(input)) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-
-    // Adicionar atributo data-category nos cards (para filtragem futura)
-    document.querySelectorAll('.tutorial-card').forEach((card, index) => {
-      card.setAttribute('data-category', ['atendimento', 'vendas', 'estoque', 'treinamento', 'financeiro'][index % 5]);
-    });
-  </script>
-
+  <script src="script.js"></script>
 </body>
 </html>
