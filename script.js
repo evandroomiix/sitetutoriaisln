@@ -5,42 +5,36 @@ const tutorials = [
   {
     title: "Relatório de Vendas Diário",
     description: "Como gerar o relatório de vendas diário no sistema WCompany.",
-    image: "assets/relatorio-vendas.jpg",
     link: "https://exemplo.com/relatorio-vendas",
     categories: ["relatorios", "wcompany"]
   },
   {
     title: "Erro 404 - Usuário não encontrado",
     description: "Passo a passo para resolver o erro 404 ao acessar perfis de usuário.",
-    image: "assets/erro-404.jpg",
     link: "https://exemplo.com/erro-404",
     categories: ["erros", "wcompany"]
   },
   {
     title: "Como emitir nota fiscal no ICompany",
     description: "Tutorial completo sobre emissão de NF-e no sistema ICompany.",
-    image: "assets/nf-icompany.jpg",
     link: "https://exemplo.com/nf-icompany",
     categories: ["icompany", "relatorios"]
   },
   {
     title: "Erro de conexão com o banco de dados",
     description: "Solução para problemas de conexão entre sistemas e banco de dados.",
-    image: "assets/erro-banco.jpg",
     link: "https://exemplo.com/erro-banco",
     categories: ["erros", "wcompany", "icompany"]
   },
   {
     title: "Relatório de Estoque Mensal",
     description: "Como exportar o relatório de estoque completo no WCompany.",
-    image: "assets/estoque.jpg",
     link: "https://exemplo.com/relatorio-estoque",
     categories: ["relatorios", "wcompany"]
   },
   {
     title: "Atualização de cadastro de fornecedores",
     description: "Como cadastrar e atualizar fornecedores no ICompany.",
-    image: "assets/fornecedor.jpg",
     link: "https://exemplo.com/fornecedor",
     categories: ["icompany"]
   },
