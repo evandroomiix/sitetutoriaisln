@@ -155,14 +155,16 @@ header h1 {
   margin-top: 1rem;
 }
 
+/* Card do tutorial - com barra verde no topo */
 .tutorial-card {
-  background-color: var(--white);
+  background-color: white;
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid #e0e0e0;
-  display: none; /* escondido até filtrar */
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
 }
 
 .dark-mode .tutorial-card {
@@ -170,147 +172,9 @@ header h1 {
   border-color: #333;
 }
 
-.tutorial-card.visible {
-  display: block;
-}
-
-.tutorial-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-}
-
-.tutorial-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.tutorial-content {
-  padding: 1.2rem;
-}
-
-.tutorial-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  margin: 0 0 0.5rem 0;
-  color: var(--primary-green);
-}
-
-.dark-mode .tutorial-title {
-  color: var(--secondary-green);
-}
-
-.tutorial-description {
-  font-size: 0.95rem;
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
-}
-
-.tutorial-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.tutorial-tag {
-  background-color: #e8f5e8;
-  color: var(--primary-green);
-  font-size: 0.8rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 10px;
-  font-weight: 600;
-}
-
-.dark-mode .tutorial-tag {
-  background-color: #0a3d0a;
-  color: var(--secondary-green);
-}
-
-.tutorial-link {
-  display: inline-block;
-  background-color: var(--primary-green);
-  color: white;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-}
-
-.tutorial-link:hover {
-  background-color: var(--secondary-green);
-}
-
-/* Ícone no canto superior da imagem */
-.tutorial-icon {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: white;
-  color: var(--primary-green);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 10;
-  border: 2px solid white;
-}
-
-.dark-mode .tutorial-icon {
-  background-color: #1e1e1e;
-  border-color: #333;
-  color: var(--secondary-green);
-}
-
-.tutorial-card {
-  position: relative; /* necessário para o ícone ficar posicionado */
-  overflow: hidden;
-}
-
-/* Rodapé - barra fina no final */
-.footer {
-  text-align: center;
-  padding: 0.8rem 0;
-  font-size: 0.9rem;
-  color: var(--text-color);
-  background-color: var(--primary-green);
-  color: white;
-  margin-top: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  font-weight: 500;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Ajuste para modo escuro */
-.dark-mode .footer {
-
-  /* Placeholder quando não há imagem */
-.tutorial-placeholder {
-  width: 100%;
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--primary-green);
-  color: white;
-  font-size: 3rem;
-}
-
-.tutorial-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  margin: 0;
-}
-
-  /* Barra verde com título centralizado */
+/* Barra verde com título */
 .tutorial-header {
-  background-color: var(--primary-green);
+  background-color: #008000; /* Verde da Lojas Nordestina */
   color: white;
   padding: 14px 16px;
   border-top-left-radius: 14px;
@@ -321,22 +185,9 @@ header h1 {
   margin-bottom: 0;
 }
 
-.tutorial-card {
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  display: none;
-  flex-direction: column;
-}
-
-.dark-mode .tutorial-card {
-  border-color: #333;
-  background-color: #1e1e1e;
-}
-
 .tutorial-content {
   padding: 1.2rem;
+  flex-grow: 1;
 }
 
 .tutorial-title {
@@ -350,7 +201,7 @@ header h1 {
   font-size: 0.95rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
-  color: var(--text-color);
+  color: #333;
 }
 
 .dark-mode .tutorial-description {
@@ -366,7 +217,7 @@ header h1 {
 
 .tutorial-tag {
   background-color: #e8f5e8;
-  color: var(--primary-green);
+  color: #008000;
   font-size: 0.8rem;
   padding: 0.3rem 0.6rem;
   border-radius: 10px;
@@ -375,12 +226,12 @@ header h1 {
 
 .dark-mode .tutorial-tag {
   background-color: #0a3d0a;
-  color: var(--secondary-green);
+  color: #2ECC71;
 }
 
 .tutorial-link {
   display: inline-block;
-  background-color: var(--primary-green);
+  background-color: #008000;
   color: white;
   padding: 0.6rem 1rem;
   border-radius: 10px;
@@ -391,8 +242,5 @@ header h1 {
 }
 
 .tutorial-link:hover {
-  background-color: var(--secondary-green);
-}
-  background-color: #006400; /* Verde escuro um pouco mais suave */
-  color: #d4edc9;
+  background-color: #2ECC71;
 }
