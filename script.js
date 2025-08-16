@@ -3,16 +3,16 @@
 // Banco de dados de tutoriais (FÁCIL DE EDITAR!)
 const tutorials = [
   {
-    title: "Relatório de Vendas Diário",
-    description: "Como gerar o relatório de vendas diário no sistema WCompany.",
-    link: "https://exemplo.com/relatorio-vendas",
-    categories: ["relatorios", "wcompany"]
+    title: "Lançamento de Nota de Compra",
+    description: "Como lançar uma nota fiscal de compra de produtos",
+    link: "https://drive.google.com/file/d/1qaMBbhn5aHflo7ALPWyjfUWhe0EmrC2c/view?usp=drive_link",
+    categories: ["relatorios", "icompany", "nota", "compra"]
   },
   {
-    title: "Erro 404 - Usuário não encontrado",
-    description: "Passo a passo para resolver o erro 404 ao acessar perfis de usuário.",
-    link: "https://exemplo.com/erro-404",
-    categories: ["erros", "wcompany"]
+    title: "Emitir nota de compra (DANFE) em PDF",
+    description: "Passo a passo para gerar um um DANFE (Documento Auxiliar da Nota Fiscal Eletrônica",
+    link: "https://drive.google.com/file/d/1CArsVNh4P4z1gGM4EgxEEiYfgRX3xaWR/view?usp=drive_link",
+    categories: ["nota", "icompany", "compra", "danfe"]
   },
   {
     title: "Como emitir nota fiscal no ICompany",
