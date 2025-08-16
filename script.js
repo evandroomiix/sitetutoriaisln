@@ -61,6 +61,7 @@ function getIconClass(title, categories) {
   if (title.includes("cadastro") || title.includes("usuário") || title.includes("usuario")) return "fas fa-user-plus";
   if (title.includes("atendimento")) return "fas fa-headset";
   if (title.includes("financeiro")) return "fas fa-wallet";
+  if (title.includes("danfe")) return "fas fa-wallet";
   
   // Ícone padrão, se não encontrar nenhuma palavra
   return "fas fa-book";
