@@ -92,17 +92,10 @@ const hasImage = tutorial.image && tutorial.image.trim() !== "";
 const iconClass = getIconClass(tutorial.title, tutorial.categories);
 
 card.innerHTML = `
-  <div class="tutorial-icon">
-    <i class="${iconClass}"></i>
-  </div>
-  ${hasImage 
-    ? `<img src="${tutorial.image}" alt="${tutorial.title}">`
-    : `<div class="tutorial-placeholder" style="background-color: var(--primary-green); color: white; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
-         <i class="${iconClass.replace('fas', 'far')}"></i>
-       </div>`
-  }
-  <div class="tutorial-content">
+  <div class="tutorial-header">
     <h3 class="tutorial-title">${tutorial.title}</h3>
+  </div>
+  <div class="tutorial-content">
     <p class="tutorial-description">${tutorial.description}</p>
     <div class="tutorial-tags">${tagsHTML}</div>
     <a href="${tutorial.link}" class="tutorial-link" target="_blank">Acessar Tutorial</a>
