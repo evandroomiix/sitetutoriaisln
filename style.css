@@ -244,3 +244,7 @@ header h1 {
 .tutorial-link:hover {
   background-color: #2ECC71;
 }
+
+.tutorial-card.visible {
+  display: flex;
+}
