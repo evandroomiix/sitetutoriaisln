@@ -111,10 +111,12 @@ card.innerHTML = `
 }
 
 // Filtro por categoria
+// Filtrar por categoria
 function filterByCategory(category) {
   const cards = document.querySelectorAll(".tutorial-card");
   const buttons = document.querySelectorAll(".category");
 
+  // Atualizar botão ativo
   buttons.forEach(btn => {
     btn.classList.remove("active");
     if (btn.dataset.filter === category) {
@@ -122,6 +124,7 @@ function filterByCategory(category) {
     }
   });
 
+  // Mostrar cards da categoria
   cards.forEach(card => {
     const cats = card.dataset.categories.split(" ");
     if (category === "all" || cats.includes(category)) {
