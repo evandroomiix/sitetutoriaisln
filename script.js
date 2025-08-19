@@ -181,3 +181,21 @@ document.querySelectorAll(".category").forEach(btn => {
 
 // Carregar tudo ao iniciar
 window.onload = loadTutorials;
+
+
+// Garantir que os eventos sejam carregados após a página
+document.addEventListener('DOMContentLoaded', function() {
+  // Adicionar eventos de clique às categorias
+  document.querySelectorAll('.category').forEach(button => {
+    button.addEventListener('click', function() {
+      const filter = this.dataset.filter;
+      filterByCategory(filter);
+    });
+  });
+
+  // Adicionar evento de busca ao campo de texto
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', filterTutorials);
+  }
+});
