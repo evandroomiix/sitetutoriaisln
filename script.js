@@ -1,52 +1,27 @@
-// script.js
-
-// Banco de dados de tutoriais (FÁCIL DE EDITAR!)
+// Banco de dados de tutoriais
 const tutorials = [
   {
-    title: "Lançamento de Nota de Compra",
-    description: "Como lançar uma nota fiscal de compra de produtos",
-    link: "https://drive.google.com/file/d/1qaMBbhn5aHflo7ALPWyjfUWhe0EmrC2c/view?usp=drive_link",
-    categories: ["relatorios", "icompany", "nota", "compra"]
-  },
-  {
-    title: "Emitir nota de compra (DANFE) em PDF",
-    description: "Passo a passo para gerar um um DANFE (Documento Auxiliar da Nota Fiscal Eletrônica",
-    link: "https://drive.google.com/file/d/1CArsVNh4P4z1gGM4EgxEEiYfgRX3xaWR/view?usp=drive_link",
-    categories: ["nota", "icompany", "compra", "danfe"]
+    title: "Registro de Inventário (Relatório de Estoque)",
+    description: "Passo a passo para gerar o relatório de inventário com filtros corretos: loja, preço, situação do estoque e impressão.",
+    link: "https://drive.google.com/file/d/1example/view", // Link para PDF ou vídeo
+    categories: ["relatorios", "estoque"]
   },
   {
     title: "Como emitir nota fiscal no ICompany",
     description: "Tutorial completo sobre emissão de NF-e no sistema ICompany.",
-    link: "https://exemplo.com/nf-icompany",
+    link: "https://drive.google.com/file/d/2example/view",
     categories: ["icompany", "relatorios"]
   },
   {
-    title: "Erro de conexão com o banco de dados",
-    description: "Solução para problemas de conexão entre sistemas e banco de dados.",
-    link: "https://exemplo.com/erro-banco",
-    categories: ["erros", "wcompany", "icompany"]
-  },
-  {
-    title: "Relatório de Estoque Mensal",
-    description: "Como exportar o relatório de estoque completo no WCompany.",
-    link: "https://exemplo.com/relatorio-estoque",
-    categories: ["relatorios", "wcompany"]
-  },
-  {
-    title: "Atualização de cadastro de fornecedores",
-    description: "Como cadastrar e atualizar fornecedores no ICompany.",
-    link: "https://exemplo.com/fornecedor",
-    categories: ["icompany"]
-  },
-  {
-    title: "Registro de Inventário (Relatório de Estoque)",
-    description: "Passo a passo para gerar o relatório de estoque com os filtros corretos no sistema.",
-    link: "assets/ROTINA-REGISTRODEINVENTÁRIO.pdf", // opcional: link para baixar
-    categories: ["relatorios", "estoque", "icompany"]
+    title: "Erro 404 - Usuário não encontrado",
+    description: "Passo a passo para resolver o erro 404 ao acessar perfis de usuário.",
+    link: "https://drive.google.com/file/d/3example/view",
+    categories: ["erros", "wcompany"]
   }
+  // Adicione mais tutoriais aqui conforme necessário
 ];
 
-// Função que escolhe o ícone com base no título ou categoria
+// Função para obter ícone baseado no título/categoria
 function getIconClass(title, categories) {
   title = title.toLowerCase();
   const cat = categories;
@@ -61,9 +36,7 @@ function getIconClass(title, categories) {
   if (title.includes("cadastro") || title.includes("usuário") || title.includes("usuario")) return "fas fa-user-plus";
   if (title.includes("atendimento")) return "fas fa-headset";
   if (title.includes("financeiro")) return "fas fa-wallet";
-  if (title.includes("danfe")) return "fas fa-wallet";
   
-  // Ícone padrão, se não encontrar nenhuma palavra
   return "fas fa-book";
 }
 
@@ -83,25 +56,22 @@ function loadTutorials() {
         relatorios: "Relatórios",
         erros: "Erros",
         wcompany: "WCompany",
-        icompany: "ICompany"
+        icompany: "ICompany",
+        estoque: "Estoque"
       }[cat] || cat;
       return `<span class="tutorial-tag">${label}</span>`;
     }).join("");
 
-// Verifica se tem imagem válida
-const hasImage = tutorial.image && tutorial.image.trim() !== "";
-const iconClass = getIconClass(tutorial.title, tutorial.categories);
-
-card.innerHTML = `
-  <div class="tutorial-header">
-    <h3 class="tutorial-title">${tutorial.title}</h3>
-  </div>
-  <div class="tutorial-content">
-    <p class="tutorial-description">${tutorial.description}</p>
-    <div class="tutorial-tags">${tagsHTML}</div>
-    <a href="${tutorial.link}" class="tutorial-link" target="_blank">Acessar Tutorial</a>
-  </div>
-`;
+    card.innerHTML = `
+      <div class="tutorial-header">
+        <h3 class="tutorial-title">${tutorial.title}</h3>
+      </div>
+      <div class="tutorial-content">
+        <p class="tutorial-description">${tutorial.description}</p>
+        <div class="tutorial-tags">${tagsHTML}</div>
+        <a href="${tutorial.link}" class="tutorial-link" target="_blank">Acessar Tutorial</a>
+      </div>
+    `;
 
     grid.appendChild(card);
   });
@@ -110,29 +80,27 @@ card.innerHTML = `
   filterByCategory("all");
 }
 
-// Filtro por categoria
 // Filtrar por categoria
-// Filtrar tutoriais por categoria
 function filterByCategory(category) {
-  const cards = document.querySelectorAll('.tutorial-card');
-  const buttons = document.querySelectorAll('.category');
+  const cards = document.querySelectorAll(".tutorial-card");
+  const buttons = document.querySelectorAll(".category");
 
   // Atualizar botão ativo
   buttons.forEach(btn => {
-    btn.classList.remove('active');
+    btn.classList.remove("active");
   });
-  document.querySelector(`.category[data-filter="${category}"]`)?.classList.add('active');
+  document.querySelector(`.category[data-filter="${category}"]`)?.classList.add("active");
 
   // Filtrar cards
   cards.forEach(card => {
-    if (category === 'all') {
-      card.classList.add('visible');
+    if (category === "all") {
+      card.classList.add("visible");
     } else {
-      const categories = card.dataset.categories.split(' ');
+      const categories = card.dataset.categories.split(" ");
       if (categories.includes(category)) {
-        card.classList.add('visible');
+        card.classList.add("visible");
       } else {
-        card.classList.remove('visible');
+        card.classList.remove("visible");
       }
     }
   });
@@ -140,39 +108,11 @@ function filterByCategory(category) {
 
 // Buscar tutoriais por palavra-chave
 function filterTutorials() {
-  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
-  const cards = document.querySelectorAll('.tutorial-card');
-
-  if (searchTerm === '') {
-    // Se não tem busca, mostrar categoria ativa
-    const activeCategory = document.querySelector('.category.active')?.dataset.filter || 'all';
-    filterByCategory(activeCategory);
-    return;
-  }
-
-  cards.forEach(card => {
-    const title = card.querySelector('.tutorial-title').textContent.toLowerCase();
-    const description = card.querySelector('.tutorial-description').textContent.toLowerCase();
-    const categories = card.dataset.categories.toLowerCase();
-
-    if (title.includes(searchTerm) || 
-        description.includes(searchTerm) || 
-        categories.includes(searchTerm)) {
-      card.classList.add('visible');
-    } else {
-      card.classList.remove('visible');
-    }
-  });
-}
-
-// Busca por texto
-// Função de busca por palavra-chave
-function filterTutorials() {
-  const input = document.getElementById("searchInput").value.toLowerCase().trim();
+  const searchTerm = document.getElementById("searchInput").value.toLowerCase().trim();
   const cards = document.querySelectorAll(".tutorial-card");
 
-  if (input === "") {
-    // Se o campo estiver vazio, mostrar todos os cards da categoria atual
+  if (searchTerm === "") {
+    // Se não tem busca, mostrar categoria ativa
     const activeCategory = document.querySelector(".category.active")?.dataset.filter || "all";
     filterByCategory(activeCategory);
     return;
@@ -180,52 +120,61 @@ function filterTutorials() {
 
   cards.forEach(card => {
     const title = card.querySelector(".tutorial-title").textContent.toLowerCase();
-    const desc = card.querySelector(".tutorial-description").textContent.toLowerCase();
-    const tags = card.dataset.categories.toLowerCase();
+    const description = card.querySelector(".tutorial-description").textContent.toLowerCase();
+    const categories = card.dataset.categories.toLowerCase();
 
-    if (title.includes(input) || desc.includes(input) || tags.includes(input)) {
+    if (title.includes(searchTerm) || 
+        description.includes(searchTerm) || 
+        categories.includes(searchTerm)) {
       card.classList.add("visible");
     } else {
       card.classList.remove("visible");
     }
   });
 }
-// Modo escuro
-document.getElementById("themeToggle").addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  const icon = document.querySelector("#themeToggle i");
-  if (document.body.classList.contains("dark-mode")) {
-    icon.className = "fas fa-sun";
-  } else {
-    icon.className = "fas fa-moon";
+
+// Função para lidar com Enter na busca
+function handleSearchEnter(event) {
+  if (event.key === "Enter") {
+    filterTutorials();
   }
-});
+}
 
-// Eventos de clique nas categorias
-document.querySelectorAll(".category").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const filter = btn.dataset.filter;
-    filterByCategory(filter);
-  });
-});
+// Inicializar quando a página carregar
+document.addEventListener("DOMContentLoaded", function() {
+  loadTutorials();
 
-// Carregar tudo ao iniciar
-window.onload = loadTutorials;
-
-
-// Garantir que os eventos sejam carregados após a página
-document.addEventListener('DOMContentLoaded', function() {
   // Adicionar eventos de clique às categorias
-  document.querySelectorAll('.category').forEach(button => {
-    button.addEventListener('click', function() {
+  document.querySelectorAll(".category").forEach(button => {
+    button.addEventListener("click", function() {
       const filter = this.dataset.filter;
       filterByCategory(filter);
     });
   });
 
-  // Adicionar evento de busca ao campo de texto
-  const searchInput = document.getElementById('searchInput');
+  // Adicionar evento de Enter no campo de busca
+  const searchInput = document.getElementById("searchInput");
   if (searchInput) {
-    searchInput.addEventListener('keyup', filterTutorials);
+    searchInput.addEventListener("keypress", handleSearchEnter);
+  }
+
+  // Adicionar evento de clique no botão de busca
+  const searchButton = document.querySelector(".search-box button");
+  if (searchButton) {
+    searchButton.addEventListener("click", filterTutorials);
+  }
+
+  // Modo escuro
+  const themeToggle = document.getElementById("themeToggle");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", function() {
+      document.body.classList.toggle("dark-mode");
+      const icon = this.querySelector("i");
+      if (document.body.classList.contains("dark-mode")) {
+        icon.className = "fas fa-sun";
+      } else {
+        icon.className = "fas fa-moon";
+      }
+    });
   }
 });
