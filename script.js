@@ -133,16 +133,22 @@ function filterByCategory(category) {
 }
 
 // Busca por texto
+// Função de busca por palavra-chave
 function filterTutorials() {
-  const input = document.getElementById("searchInput").value.toLowerCase();
+  const input = document.getElementById("searchInput").value.toLowerCase().trim();
   const cards = document.querySelectorAll(".tutorial-card");
+
+  if (input === "") {
+    // Se o campo estiver vazio, mostrar todos os cards da categoria atual
+    const activeCategory = document.querySelector(".category.active")?.dataset.filter || "all";
+    filterByCategory(activeCategory);
+    return;
+  }
 
   cards.forEach(card => {
     const title = card.querySelector(".tutorial-title").textContent.toLowerCase();
     const desc = card.querySelector(".tutorial-description").textContent.toLowerCase();
-    const tags = card.dataset.categories.replace(/relatorios|erros|wcompany|icompany/g, m => {
-      return { relatorios: "relatório", erros: "erro", wcompany: "wcompany", icompany: "icompany" }[m];
-    }).toLowerCase();
+    const tags = card.dataset.categories.toLowerCase();
 
     if (title.includes(input) || desc.includes(input) || tags.includes(input)) {
       card.classList.add("visible");
@@ -151,7 +157,6 @@ function filterTutorials() {
     }
   });
 }
-
 // Modo escuro
 document.getElementById("themeToggle").addEventListener("click", () => {
   document.body.classList.toggle("dark-mode");
