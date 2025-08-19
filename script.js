@@ -112,25 +112,55 @@ card.innerHTML = `
 
 // Filtro por categoria
 // Filtrar por categoria
+// Filtrar tutoriais por categoria
 function filterByCategory(category) {
-  const cards = document.querySelectorAll(".tutorial-card");
-  const buttons = document.querySelectorAll(".category");
+  const cards = document.querySelectorAll('.tutorial-card');
+  const buttons = document.querySelectorAll('.category');
 
   // Atualizar botão ativo
   buttons.forEach(btn => {
-    btn.classList.remove("active");
-    if (btn.dataset.filter === category) {
-      btn.classList.add("active");
+    btn.classList.remove('active');
+  });
+  document.querySelector(`.category[data-filter="${category}"]`)?.classList.add('active');
+
+  // Filtrar cards
+  cards.forEach(card => {
+    if (category === 'all') {
+      card.classList.add('visible');
+    } else {
+      const categories = card.dataset.categories.split(' ');
+      if (categories.includes(category)) {
+        card.classList.add('visible');
+      } else {
+        card.classList.remove('visible');
+      }
     }
   });
+}
 
-  // Mostrar cards da categoria
+// Buscar tutoriais por palavra-chave
+function filterTutorials() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.tutorial-card');
+
+  if (searchTerm === '') {
+    // Se não tem busca, mostrar categoria ativa
+    const activeCategory = document.querySelector('.category.active')?.dataset.filter || 'all';
+    filterByCategory(activeCategory);
+    return;
+  }
+
   cards.forEach(card => {
-    const cats = card.dataset.categories.split(" ");
-    if (category === "all" || cats.includes(category)) {
-      card.classList.add("visible");
+    const title = card.querySelector('.tutorial-title').textContent.toLowerCase();
+    const description = card.querySelector('.tutorial-description').textContent.toLowerCase();
+    const categories = card.dataset.categories.toLowerCase();
+
+    if (title.includes(searchTerm) || 
+        description.includes(searchTerm) || 
+        categories.includes(searchTerm)) {
+      card.classList.add('visible');
     } else {
-      card.classList.remove("visible");
+      card.classList.remove('visible');
     }
   });
 }
