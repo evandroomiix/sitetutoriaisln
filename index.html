@@ -39,10 +39,48 @@
     </div>
   </div>
 
-  <script src="js/script.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </body>
 </html>
 <!-- Rodapé -->
 <footer class="footer">
   <p>Site desenvolvido por Evandro Magno</p>
 </footer>
+<style>
+  body {
+    background-color: #0f172a; /* ou mantenha sua cor original se quiser */
+    color: #f8fafc; /* ou mantenha sua cor original */
+  }
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1e293b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+  }
+</style>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+        },
+        colors: {
+          slate: {
+            850: '#1e293b',
+            950: '#020617',
+          }
+        }
+      },
+    },
+  }
+</script>
