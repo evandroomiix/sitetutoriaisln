@@ -1104,9 +1104,17 @@
 
         // Função global para o botão admin (fallback)
         function toggleAdminPanel() {
+            alert('Função toggleAdminPanel() foi chamada!');
+            
             const $adminContent = document.getElementById('admin-content');
             const $adminLogin = document.getElementById('admin-login');
             const $adminToggleIcon = document.getElementById('admin-toggle-icon');
+            
+            console.log('Elementos encontrados:', {
+                adminContent: $adminContent,
+                adminLogin: $adminLogin,
+                adminToggleIcon: $adminToggleIcon
+            });
             
             const painelCadastroAberto = $adminContent && !$adminContent.classList.contains('hidden');
             const painelLoginAberto = $adminLogin && !$adminLogin.classList.contains('hidden');
@@ -1120,17 +1128,25 @@
                 adminAuth = false;
             }
 
+            console.log('Estado:', { painelAberto, adminAuth });
+
             // Se já está aberto, fecha tudo
             if (painelAberto) {
+                console.log('Fechando painel');
                 if ($adminContent) $adminContent.classList.add('hidden');
                 if ($adminLogin) $adminLogin.classList.add('hidden');
                 if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
             } else {
+                console.log('Abrindo painel');
                 // Abrir conforme estado de autenticação
                 if (adminAuth) {
-                    if ($adminContent) $adminContent.classList.remove('hidden');
+                    if ($adminContent) {
+                        $adminContent.classList.remove('hidden');
+                        console.log('Mostrando painel de cadastro');
+                    }
                 } else if ($adminLogin) {
                     $adminLogin.classList.remove('hidden');
+                    console.log('Mostrando painel de login');
                 }
                 if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
             }
