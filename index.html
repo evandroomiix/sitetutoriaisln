@@ -975,12 +975,13 @@
         });
 
         document.addEventListener('click', (e) => {
-            if ($sidebar.classList.contains('translate-x-0') && !$sidebar.contains(e.target) && e.target !== $sidebarToggle) {
-                 // Fecha sidebar se clicar fora dele (mas não fecha ao clicar no toggle)
-                 if (window.innerWidth < 768) { // Apenas em dispositivos móveis
-                    $sidebar.classList.add('-translate-x-full');
-                    $sidebarOverlay.classList.add('hidden');
-                 }
+            // Fecha sidebar se estiver aberto e clicar fora dele (apenas em mobile)
+            if (window.innerWidth < 768 && 
+                !$sidebar.classList.contains('-translate-x-full') && 
+                !$sidebar.contains(e.target) && 
+                e.target !== $sidebarToggle) {
+                $sidebar.classList.add('-translate-x-full');
+                $sidebarOverlay.classList.add('hidden');
             }
         });
 
@@ -1287,6 +1288,15 @@
 
         // Inicializar a UI
         inicializarTutoriais();
+
+        // Adicionar listener para resize da janela
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                // Em desktop, sempre mostra o sidebar
+                $sidebar.classList.remove('-translate-x-full');
+                $sidebarOverlay.classList.add('hidden');
+            }
+        });
 
     </script>
 </body>
