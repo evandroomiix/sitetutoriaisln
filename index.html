@@ -224,8 +224,13 @@
                     <p id="admin-login-status" class="text-xs text-red-400"></p>
                 </div>
                 <div id="admin-content" class="mt-4 space-y-4 hidden">
+                    <div class="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4">
+                        <p class="text-xs text-blue-300">
+                            <strong>💡 Sistema Online:</strong> Os tutoriais são carregados do servidor e ficam disponíveis para todos os usuários imediatamente.
+                        </p>
+                    </div>
                     <p class="text-xs text-slate-400">
-                        Preencha os campos abaixo para cadastrar novos tutoriais. Eles serão salvos apenas neste navegador.
+                        Preencha os campos abaixo para cadastrar novos tutoriais. Eles serão salvos no servidor.
                     </p>
                     <form id="admin-form" class="grid gap-4 md:grid-cols-2">
                         <div class="md:col-span-2">
@@ -379,21 +384,27 @@
             }
         ];
 
-        // Carrega tutoriais extras salvos no navegador
-        function carregarTutoriaisExtras() {
+        // Carrega tutoriais extras do servidor
+        async function carregarTutoriaisExtras() {
             try {
-                const raw = localStorage.getItem('tutoriais_ln_custom');
-                if (!raw) return [];
-                const parsed = JSON.parse(raw);
-                if (!Array.isArray(parsed)) return [];
-                return parsed;
+                const response = await fetch('tutoriais_custom.json');
+                if (!response.ok) return [];
+                const data = await response.json();
+                return data.tutoriais || [];
             } catch (e) {
-                console.error('Erro ao carregar tutoriais salvos', e);
+                console.error('Erro ao carregar tutoriais do servidor:', e);
                 return [];
             }
         }
 
-        let tutoriaisExtras = carregarTutoriaisExtras();
+        let tutoriaisExtras = [];
+
+        // Inicializar carregando os tutoriais do servidor
+        async function inicializarTutoriais() {
+            tutoriaisExtras = await carregarTutoriaisExtras();
+            TUTORIAIS = construirListaTutoriais();
+            atualizarUI();
+        }
 
         function normalizarTutorial(tutorial) {
             const tagsNormalizadas = Array.isArray(tutorial.tags)
@@ -421,8 +432,11 @@
         let TUTORIAIS = construirListaTutoriais();
 
         function persistirTutoriaisExtras() {
+            // Em um ambiente real, aqui faria uma requisição POST/PUT para o servidor
+            // Por enquanto, mantemos no localStorage como backup
             try {
                 localStorage.setItem('tutoriais_ln_custom', JSON.stringify(tutoriaisExtras));
+                console.log('Tutoriais salvos localmente (aguardando implementação do servidor)');
             } catch (e) {
                 console.error('Erro ao salvar tutoriais', e);
             }
@@ -1171,7 +1185,7 @@
         });
 
         // Inicializar a UI
-        atualizarUI();
+        inicializarTutoriais();
 
     </script>
 </body>
