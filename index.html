@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutoriais LN</title>
+    <title>Lojas Nordestina - Tutoriais</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -78,8 +78,8 @@
                 </button>
                 <!-- Logo clicável -->
                 <a href="#" id="logo-link" class="flex items-center gap-2">
-                    <img src="assets/LOGO.png" alt="Tutoriais LN" class="h-8 w-auto">
-                    <span class="text-xl font-bold text-white">Tutoriais LN</span>
+                    <img src="assets/LOGO.png" alt="Lojas Nordestina" class="h-8 w-auto">
+                    <span class="text-xl font-bold text-white">Lojas Nordestina</span>
                 </a>
             </div>
 
@@ -190,12 +190,33 @@
                 </div>
             </div>
 
-            <!-- Área Administrativa -->
+            <!-- Painel do Administrador -->
             <section id="admin-section" class="mt-12 border border-emerald-800 rounded-2xl p-4 bg-emerald-950/60">
                 <button id="admin-toggle" class="w-full flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors">
-                    <span>Área Administrativa</span>
+                    <span>Painel do Administrador</span>
                     <span id="admin-toggle-icon">+</span>
                 </button>
+                <div id="admin-login" class="mt-4 space-y-3 hidden">
+                    <p class="text-xs text-slate-400">
+                        Faça login para acessar o painel de cadastro de tutoriais.
+                    </p>
+                    <div class="grid gap-3 md:grid-cols-3 items-end">
+                        <div>
+                            <label for="admin-user" class="block text-xs font-medium text-slate-300 mb-1">Usuário</label>
+                            <input id="admin-user" type="text" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: admin" />
+                        </div>
+                        <div>
+                            <label for="admin-password" class="block text-xs font-medium text-slate-300 mb-1">Senha</label>
+                            <input id="admin-password" type="password" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                        </div>
+                        <div>
+                            <button id="admin-login-btn" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                Entrar
+                            </button>
+                        </div>
+                    </div>
+                    <p id="admin-login-status" class="text-xs text-red-400"></p>
+                </div>
                 <div id="admin-content" class="mt-4 space-y-4 hidden">
                     <p class="text-xs text-slate-400">
                         Preencha os campos abaixo para cadastrar novos tutoriais. Eles serão salvos apenas neste navegador.
@@ -238,7 +259,7 @@
             <!-- Footer -->
             <footer class="mt-12 border-t border-slate-800/50 pt-6 pb-2">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-                    <p>&copy; 2025 Tutoriais LN. Todos os direitos reservados.</p>
+                    <p>&copy; 2025 Lojas Nordestina. Todos os direitos reservados.</p>
                     <div class="flex items-center gap-4">
                         <a href="https://github.com/evandroomiix/sitetutoriaisln" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">
                             Repositório GitHub
@@ -350,6 +371,11 @@
         const $breadcrumbCurrent = document.getElementById('breadcrumb-current');
         const $adminToggle = document.getElementById('admin-toggle');
         const $adminToggleIcon = document.getElementById('admin-toggle-icon');
+        const $adminLogin = document.getElementById('admin-login');
+        const $adminLoginUser = document.getElementById('admin-user');
+        const $adminLoginPassword = document.getElementById('admin-password');
+        const $adminLoginBtn = document.getElementById('admin-login-btn');
+        const $adminLoginStatus = document.getElementById('admin-login-status');
         const $adminContent = document.getElementById('admin-content');
         const $adminForm = document.getElementById('admin-form');
         const $adminStatus = document.getElementById('admin-status');
@@ -358,6 +384,14 @@
         const $adminType = document.getElementById('admin-type');
         const $adminTags = document.getElementById('admin-tags');
         const $adminContentField = document.getElementById('admin-content-field');
+
+        // Controle simples de autenticação do painel
+        let adminAutenticado = false;
+        try {
+            adminAutenticado = localStorage.getItem('ln_admin_authed') === 'true';
+        } catch (e) {
+            adminAutenticado = false;
+        }
 
         // Função para obter todas as categorias únicas
         function obterCategorias() {
@@ -594,16 +628,59 @@
             });
         }
 
-        // Área Administrativa
+        // Área Administrativa / Painel do Administrador
         if ($adminToggle && $adminContent) {
             $adminToggle.addEventListener('click', () => {
-                const isHidden = $adminContent.classList.contains('hidden');
-                if (isHidden) {
-                    $adminContent.classList.remove('hidden');
-                    if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
-                } else {
-                    $adminContent.classList.add('hidden');
+                const painelAberto = !$adminContent.classList.contains('hidden') || ($adminLogin && !$adminLogin.classList.contains('hidden'));
+
+                // Se já está aberto, fecha tudo
+                if (painelAberto) {
+                    if ($adminContent) $adminContent.classList.add('hidden');
+                    if ($adminLogin) $adminLogin.classList.add('hidden');
                     if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+                    return;
+                }
+
+                // Abrir conforme estado de autenticação
+                if (adminAutenticado) {
+                    if ($adminContent) $adminContent.classList.remove('hidden');
+                } else if ($adminLogin) {
+                    $adminLogin.classList.remove('hidden');
+                }
+                if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
+            });
+        }
+
+        if ($adminLoginBtn) {
+            $adminLoginBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const user = ($adminLoginUser?.value || '').trim();
+                const pass = ($adminLoginPassword?.value || '').trim();
+
+                // Credenciais simples; ajuste se quiser outros valores
+                const USER_OK = 'admin';
+                const PASS_OK = 'ln2025!';
+
+                if (user === USER_OK && pass === PASS_OK) {
+                    adminAutenticado = true;
+                    try {
+                        localStorage.setItem('ln_admin_authed', 'true');
+                    } catch (err) {}
+
+                    if ($adminLoginStatus) {
+                        $adminLoginStatus.textContent = 'Login realizado com sucesso.';
+                        $adminLoginStatus.classList.remove('text-red-400');
+                        $adminLoginStatus.classList.add('text-green-400');
+                    }
+
+                    if ($adminLogin) $adminLogin.classList.add('hidden');
+                    if ($adminContent) $adminContent.classList.remove('hidden');
+                } else {
+                    if ($adminLoginStatus) {
+                        $adminLoginStatus.textContent = 'Usuário ou senha incorretos.';
+                        $adminLoginStatus.classList.remove('text-green-400');
+                        $adminLoginStatus.classList.add('text-red-400');
+                    }
                 }
             });
         }
