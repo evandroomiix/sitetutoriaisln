@@ -227,7 +227,12 @@
                             <input id="admin-title" type="text" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required />
                         </div>
                         <div class="md:col-span-2">
-                            <label for="admin-excerpt" class="block text-xs font-medium text-slate-300 mb-1">Resumo</label>
+                            <div class="flex items-center justify-between mb-1">
+                                <label for="admin-excerpt" class="block text-xs font-medium text-slate-300">Resumo</label>
+                                <button type="button" id="admin-generate-excerpt" class="text-[11px] px-2 py-1 rounded bg-green-600 hover:bg-green-500 text-white font-medium">
+                                    Gerar resumo automático
+                                </button>
+                            </div>
                             <textarea id="admin-excerpt" rows="2" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required></textarea>
                         </div>
                         <div>
@@ -236,7 +241,9 @@
                                 <option value="TUTORIAL">Tutorial</option>
                                 <option value="ARTICLE">Artigo</option>
                                 <option value="VIDEO">Vídeo</option>
+                                <option value="CUSTOM">Outro (personalizado)</option>
                             </select>
+                            <input id="admin-type-custom" type="text" placeholder="Ex: CHECKLIST, PROCEDIMENTO" class="mt-2 w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500 hidden" />
                         </div>
                         <div>
                             <label for="admin-tags" class="block text-xs font-medium text-slate-300 mb-1">Tags (separadas por vírgula)</label>
@@ -247,9 +254,14 @@
                             <textarea id="admin-content-field" rows="4" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="<p>Passo a passo...</p>" required></textarea>
                         </div>
                         <div class="md:col-span-2 flex items-center justify-between gap-4">
-                            <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
-                                Salvar Tutorial
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                    Salvar Tutorial
+                                </button>
+                                <button type="button" id="admin-cancel" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-slate-100 rounded-lg text-sm font-medium transition-colors border border-emerald-700">
+                                    Cancelar
+                                </button>
+                            </div>
                             <p id="admin-status" class="text-xs text-slate-400"></p>
                         </div>
                     </form>
@@ -382,8 +394,11 @@
         const $adminTitle = document.getElementById('admin-title');
         const $adminExcerpt = document.getElementById('admin-excerpt');
         const $adminType = document.getElementById('admin-type');
+        const $adminTypeCustom = document.getElementById('admin-type-custom');
         const $adminTags = document.getElementById('admin-tags');
         const $adminContentField = document.getElementById('admin-content-field');
+        const $adminGenerateExcerpt = document.getElementById('admin-generate-excerpt');
+        const $adminCancel = document.getElementById('admin-cancel');
 
         // Controle simples de autenticação do painel
         let adminAutenticado = false;
@@ -391,6 +406,14 @@
             adminAutenticado = localStorage.getItem('ln_admin_authed') === 'true';
         } catch (e) {
             adminAutenticado = false;
+        }
+
+        function gerarResumoAutomatico(titulo) {
+            if (!titulo) {
+                return '';
+            }
+            const base = titulo.trim();
+            return `Resumo automático: ${base} — passo a passo para que o colaborador da Lojas Nordestina execute essa atividade no sistema com segurança e padronização.`;
         }
 
         // Função para obter todas as categorias únicas
@@ -685,13 +708,67 @@
             });
         }
 
+        // Mudança de tipo para permitir tipo personalizado
+        if ($adminType && $adminTypeCustom) {
+            $adminType.addEventListener('change', () => {
+                if ($adminType.value === 'CUSTOM') {
+                    $adminTypeCustom.classList.remove('hidden');
+                    $adminTypeCustom.focus();
+                } else {
+                    $adminTypeCustom.classList.add('hidden');
+                    $adminTypeCustom.value = '';
+                }
+            });
+        }
+
+        // Botão de gerar resumo automático
+        if ($adminGenerateExcerpt) {
+            $adminGenerateExcerpt.addEventListener('click', () => {
+                const titulo = ($adminTitle?.value || '').trim();
+                if (!titulo) {
+                    if ($adminStatus) {
+                        $adminStatus.textContent = 'Preencha o título antes de gerar o resumo.';
+                        $adminStatus.classList.remove('text-green-400');
+                        $adminStatus.classList.add('text-red-400');
+                    }
+                    return;
+                }
+                const resumo = gerarResumoAutomatico(titulo);
+                if (resumo && $adminExcerpt) {
+                    $adminExcerpt.value = resumo;
+                    if ($adminStatus) {
+                        $adminStatus.textContent = 'Resumo automático sugerido. Ajuste o texto se necessário.';
+                        $adminStatus.classList.remove('text-red-400');
+                        $adminStatus.classList.add('text-green-400');
+                    }
+                }
+            });
+        }
+
+        // Botão de cancelar tutorial (limpa o formulário e fecha o painel de edição)
+        if ($adminCancel && $adminForm) {
+            $adminCancel.addEventListener('click', () => {
+                $adminForm.reset();
+                if ($adminTypeCustom) {
+                    $adminTypeCustom.classList.add('hidden');
+                    $adminTypeCustom.value = '';
+                }
+                if ($adminStatus) {
+                    $adminStatus.textContent = 'Edição cancelada.';
+                    $adminStatus.classList.remove('text-red-400');
+                    $adminStatus.classList.add('text-slate-400');
+                }
+            });
+        }
+
         if ($adminForm) {
             $adminForm.addEventListener('submit', (e) => {
                 e.preventDefault();
 
                 const title = $adminTitle.value.trim();
                 const excerpt = $adminExcerpt.value.trim();
-                const type = $adminType.value;
+                let type = $adminType.value;
+                const customTypeRaw = ($adminTypeCustom?.value || '').trim();
                 const tagsRaw = $adminTags.value.split(',').map(t => t.trim()).filter(Boolean);
                 const content = $adminContentField.value.trim();
 
@@ -702,6 +779,18 @@
                         $adminStatus.classList.add('text-red-400');
                     }
                     return;
+                }
+
+                if (type === 'CUSTOM') {
+                    if (!customTypeRaw) {
+                        if ($adminStatus) {
+                            $adminStatus.textContent = 'Informe o nome do tipo personalizado.';
+                            $adminStatus.classList.remove('text-green-400');
+                            $adminStatus.classList.add('text-red-400');
+                        }
+                        return;
+                    }
+                    type = customTypeRaw.toUpperCase();
                 }
 
                 const novoTutorial = {
