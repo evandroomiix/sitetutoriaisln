@@ -90,6 +90,7 @@
                         type="text"
                         id="search-input"
                         placeholder="Buscar tutoriais..."
+                        autocomplete="off"
                         class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -358,13 +359,25 @@
 
         let tutoriaisExtras = carregarTutoriaisExtras();
 
+        function normalizarTutorial(tutorial) {
+            const tagsNormalizadas = Array.isArray(tutorial.tags)
+                ? tutorial.tags
+                : (typeof tutorial.tags === 'string' && tutorial.tags.trim() !== ''
+                    ? [tutorial.tags.trim()]
+                    : []);
+            return {
+                ...tutorial,
+                tags: tagsNormalizadas
+            };
+        }
+
         function construirListaTutoriais() {
             const mapa = new Map();
             TUTORIAIS_BASE.forEach(t => {
-                mapa.set(t.id, { ...t });
+                mapa.set(t.id, normalizarTutorial(t));
             });
             tutoriaisExtras.forEach(t => {
-                mapa.set(t.id, { ...t });
+                mapa.set(t.id, normalizarTutorial(t));
             });
             return Array.from(mapa.values());
         }
@@ -458,6 +471,12 @@
         // Inicializa visibilidade com base no estado salvo
         atualizarVisibilidadePainelAdmin();
 
+        // Garante que o campo de busca comece vazio (mesmo se o navegador sugerir último valor)
+        if ($searchInput) {
+            $searchInput.value = '';
+            estadoAtual.busca = '';
+        }
+
         function gerarResumoAutomatico(titulo) {
             if (!titulo) {
                 return '';
@@ -494,13 +513,14 @@
         // Função para filtrar tutoriais com base no estado
         function filtrarTutoriais() {
             return TUTORIAIS.filter(t => {
+                const tags = Array.isArray(t.tags) ? t.tags : [];
                 const matchesType = estadoAtual.tipo === 'ALL' || t.type === estadoAtual.tipo;
-                const matchesCategory = estadoAtual.categoria === 'all' || t.tags.includes(estadoAtual.categoria);
+                const matchesCategory = estadoAtual.categoria === 'all' || tags.includes(estadoAtual.categoria);
                 const searchLower = estadoAtual.busca.toLowerCase();
                 const matchesSearch = !estadoAtual.busca ||
                     t.title.toLowerCase().includes(searchLower) ||
                     t.excerpt.toLowerCase().includes(searchLower) ||
-                    t.tags.some(tag => tag.toLowerCase().includes(searchLower));
+                    tags.some(tag => tag.toLowerCase().includes(searchLower));
 
                 return matchesType && matchesCategory && matchesSearch;
             });
