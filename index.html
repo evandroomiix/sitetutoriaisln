@@ -226,11 +226,12 @@
                 <div id="admin-content" class="mt-4 space-y-4 hidden">
                     <div class="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4">
                         <p class="text-xs text-blue-300">
-                            <strong>💡 Sistema Online:</strong> Os tutoriais são carregados do servidor e ficam disponíveis para todos os usuários imediatamente.
+                            <strong>💡 Sistema Híbrido:</strong> Carrega tutoriais do servidor e mantém seus criados localmente. 
+                            Os tutoriais criados por você aparecem mesmo após atualizar a página.
                         </p>
                     </div>
                     <p class="text-xs text-slate-400">
-                        Preencha os campos abaixo para cadastrar novos tutoriais. Eles serão salvos no servidor.
+                        Preencha os campos abaixo para cadastrar novos tutoriais. Eles ficarão disponíveis imediatamente.
                     </p>
                     <form id="admin-form" class="grid gap-4 md:grid-cols-2">
                         <div class="md:col-span-2">
@@ -384,16 +385,58 @@
             }
         ];
 
-        // Carrega tutoriais extras do servidor
+        // Carrega tutoriais extras do servidor e localStorage
         async function carregarTutoriaisExtras() {
             try {
+                // Primeiro carrega do servidor
                 const response = await fetch('tutoriais_custom.json');
-                if (!response.ok) return [];
-                const data = await response.json();
-                return data.tutoriais || [];
+                let servidorTutoriais = [];
+                if (response.ok) {
+                    const data = await response.json();
+                    servidorTutoriais = data.tutoriais || [];
+                }
+                
+                // Depois carrega do localStorage (prioridade para dados mais recentes)
+                let localStorageTutoriais = [];
+                try {
+                    const raw = localStorage.getItem('tutoriais_ln_custom');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) {
+                            localStorageTutoriais = parsed;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Erro ao carregar do localStorage:', e);
+                }
+                
+                // Combina os dados, dando prioridade ao localStorage (mais recentes)
+                const mapa = new Map();
+                
+                // Adiciona tutoriais do servidor
+                servidorTutoriais.forEach(t => {
+                    mapa.set(t.id, normalizarTutorial(t));
+                });
+                
+                // Sobrescreve/adiciona tutoriais do localStorage
+                localStorageTutoriais.forEach(t => {
+                    mapa.set(t.id, normalizarTutorial(t));
+                });
+                
+                return Array.from(mapa.values());
             } catch (e) {
                 console.error('Erro ao carregar tutoriais do servidor:', e);
-                return [];
+                // Fallback: tenta apenas localStorage
+                try {
+                    const raw = localStorage.getItem('tutoriais_ln_custom');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        return Array.isArray(parsed) ? parsed.map(normalizarTutorial) : [];
+                    }
+                } catch (e2) {
+                    console.error('Erro ao carregar do localStorage:', e2);
+                    return [];
+                }
             }
         }
 
@@ -432,11 +475,21 @@
         let TUTORIAIS = construirListaTutoriais();
 
         function persistirTutoriaisExtras() {
-            // Em um ambiente real, aqui faria uma requisição POST/PUT para o servidor
-            // Por enquanto, mantemos no localStorage como backup
+            // Salva no localStorage como backup
             try {
                 localStorage.setItem('tutoriais_ln_custom', JSON.stringify(tutoriaisExtras));
-                console.log('Tutoriais salvos localmente (aguardando implementação do servidor)');
+                console.log('Tutoriais salvos localmente');
+                
+                // Mostra mensagem para atualizar o arquivo JSON do servidor
+                if ($adminStatus) {
+                    $adminStatus.innerHTML = `
+                        <div class="text-green-400 mb-2">✅ Tutorial salvo localmente!</div>
+                        <div class="text-yellow-300 text-xs">
+                            ⚠️ Para manter permanentemente, atualize o arquivo <code>tutoriais_custom.json</code> no servidor com:
+                            <pre class="bg-black/30 p-2 rounded mt-1 text-xs">${JSON.stringify(tutoriaisExtras, null, 2)}</pre>
+                        </div>
+                    `;
+                }
             } catch (e) {
                 console.error('Erro ao salvar tutoriais', e);
             }
