@@ -192,10 +192,15 @@
 
             <!-- Painel do Administrador -->
             <section id="admin-section" class="mt-12 border border-emerald-800 rounded-2xl p-4 bg-emerald-950/60">
-                <button id="admin-toggle" class="w-full flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors">
-                    <span>Painel do Administrador</span>
-                    <span id="admin-toggle-icon">+</span>
-                </button>
+                <div class="flex items-center justify-between gap-2">
+                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors">
+                        <span>Painel do Administrador</span>
+                        <span id="admin-toggle-icon">+</span>
+                    </button>
+                    <button id="admin-logout" class="ml-2 px-3 py-2 bg-emerald-900 hover:bg-emerald-800 text-slate-100 rounded-xl text-xs font-medium transition-colors border border-emerald-700 hidden">
+                        Sair
+                    </button>
+                </div>
                 <div id="admin-login" class="mt-4 space-y-3 hidden">
                     <p class="text-xs text-slate-400">
                         Faça login para acessar o painel de cadastro de tutoriais.
@@ -344,7 +349,19 @@
         }
 
         let tutoriaisExtras = carregarTutoriaisExtras();
-        let TUTORIAIS = [...TUTORIAIS_BASE, ...tutoriaisExtras];
+
+        function construirListaTutoriais() {
+            const mapa = new Map();
+            TUTORIAIS_BASE.forEach(t => {
+                mapa.set(t.id, { ...t });
+            });
+            tutoriaisExtras.forEach(t => {
+                mapa.set(t.id, { ...t });
+            });
+            return Array.from(mapa.values());
+        }
+
+        let TUTORIAIS = construirListaTutoriais();
 
         function persistirTutoriaisExtras() {
             try {
@@ -383,6 +400,8 @@
         const $breadcrumbCurrent = document.getElementById('breadcrumb-current');
         const $adminToggle = document.getElementById('admin-toggle');
         const $adminToggleIcon = document.getElementById('admin-toggle-icon');
+        const $adminSection = document.getElementById('admin-section');
+        const $adminLogout = document.getElementById('admin-logout');
         const $adminLogin = document.getElementById('admin-login');
         const $adminLoginUser = document.getElementById('admin-user');
         const $adminLoginPassword = document.getElementById('admin-password');
@@ -407,6 +426,27 @@
         } catch (e) {
             adminAutenticado = false;
         }
+
+        function atualizarVisibilidadePainelAdmin() {
+            if (!$adminSection) return;
+
+            if (adminAutenticado) {
+                // Mostra o botão de sair e permite abrir o painel de cadastro
+                if ($adminLogout) $adminLogout.classList.remove('hidden');
+                if ($adminLogin) $adminLogin.classList.add('hidden');
+                if ($adminContent) $adminContent.classList.add('hidden');
+                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+            } else {
+                // Usuário comum: painel fechado, só login será mostrado quando clicar
+                if ($adminLogout) $adminLogout.classList.add('hidden');
+                if ($adminContent) $adminContent.classList.add('hidden');
+                if ($adminLogin) $adminLogin.classList.add('hidden');
+                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+            }
+        }
+
+        // Inicializa visibilidade com base no estado salvo
+        atualizarVisibilidadePainelAdmin();
 
         function gerarResumoAutomatico(titulo) {
             if (!titulo) {
@@ -508,6 +548,44 @@
         }
 
         // Função para renderizar o detalhe de um tutorial
+        let tutorialEmEdicaoId = null;
+
+        function preencherFormularioAdminComTutorial(tutorial) {
+            if (!$adminForm) return;
+            if ($adminTitle) $adminTitle.value = tutorial.title || '';
+            if ($adminExcerpt) $adminExcerpt.value = tutorial.excerpt || '';
+
+            // Tipo
+            if ($adminType && $adminTypeCustom) {
+                const tipoUpper = (tutorial.type || '').toUpperCase();
+                if (tipoUpper === 'TUTORIAL' || tipoUpper === 'ARTICLE' || tipoUpper === 'VIDEO') {
+                    $adminType.value = tipoUpper;
+                    $adminTypeCustom.classList.add('hidden');
+                    $adminTypeCustom.value = '';
+                } else {
+                    $adminType.value = 'CUSTOM';
+                    $adminTypeCustom.classList.remove('hidden');
+                    $adminTypeCustom.value = tipoUpper;
+                }
+            }
+
+            // Tags
+            if ($adminTags) {
+                $adminTags.value = Array.isArray(tutorial.tags) ? tutorial.tags.join(', ') : '';
+            }
+
+            // Conteúdo
+            if ($adminContentField) {
+                $adminContentField.value = tutorial.content || '';
+            }
+
+            if ($adminStatus) {
+                $adminStatus.textContent = 'Editando tutorial existente. Ao salvar, ele será atualizado.';
+                $adminStatus.classList.remove('text-red-400');
+                $adminStatus.classList.add('text-green-400');
+            }
+        }
+
         function renderizarDetalhe(tutorial) {
             $tutorialList.style.display = 'none';
             $tutorialDetail.style.display = 'block';
@@ -530,12 +608,34 @@
                         </span>
                         <h1 class="mt-2 text-3xl font-bold text-white">${tutorial.title}</h1>
                         <p class="mt-2 text-slate-400">${tutorial.excerpt}</p>
+                        ${adminAutenticado ? `
+                        <button id="admin-edit-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-xs font-medium text-emerald-100 border border-emerald-700">
+                            Editar este tutorial
+                        </button>` : ''}
                     </div>
                     <div class="prose prose-invert max-w-none">
                         ${tutorial.content}
                     </div>
                 </div>
             `;
+
+            if (adminAutenticado) {
+                const $editBtn = document.getElementById('admin-edit-tutorial');
+                if ($editBtn) {
+                    $editBtn.addEventListener('click', () => {
+                        tutorialEmEdicaoId = tutorial.id;
+                        preencherFormularioAdminComTutorial(tutorial);
+                        // Abre painel e rola para ele
+                        if ($adminContent) $adminContent.classList.remove('hidden');
+                        if ($adminLogin) $adminLogin.classList.add('hidden');
+                        if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
+                        const adminSectionEl = document.getElementById('admin-section');
+                        if (adminSectionEl) {
+                            adminSectionEl.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    });
+                }
+            }
         }
 
         // Função para voltar à lista
@@ -652,25 +752,26 @@
         }
 
         // Área Administrativa / Painel do Administrador
-        if ($adminToggle && $adminContent) {
+        if ($adminToggle) {
             $adminToggle.addEventListener('click', () => {
-                const painelAberto = !$adminContent.classList.contains('hidden') || ($adminLogin && !$adminLogin.classList.contains('hidden'));
+                const painelCadastroAberto = $adminContent && !$adminContent.classList.contains('hidden');
+                const painelLoginAberto = $adminLogin && !$adminLogin.classList.contains('hidden');
+                const painelAberto = painelCadastroAberto || painelLoginAberto;
 
                 // Se já está aberto, fecha tudo
                 if (painelAberto) {
                     if ($adminContent) $adminContent.classList.add('hidden');
                     if ($adminLogin) $adminLogin.classList.add('hidden');
                     if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
-                    return;
+                } else {
+                    // Abrir conforme estado de autenticação
+                    if (adminAutenticado) {
+                        if ($adminContent) $adminContent.classList.remove('hidden');
+                    } else if ($adminLogin) {
+                        $adminLogin.classList.remove('hidden');
+                    }
+                    if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
                 }
-
-                // Abrir conforme estado de autenticação
-                if (adminAutenticado) {
-                    if ($adminContent) $adminContent.classList.remove('hidden');
-                } else if ($adminLogin) {
-                    $adminLogin.classList.remove('hidden');
-                }
-                if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
             });
         }
 
@@ -698,6 +799,7 @@
 
                     if ($adminLogin) $adminLogin.classList.add('hidden');
                     if ($adminContent) $adminContent.classList.remove('hidden');
+                    atualizarVisibilidadePainelAdmin();
                 } else {
                     if ($adminLoginStatus) {
                         $adminLoginStatus.textContent = 'Usuário ou senha incorretos.';
@@ -705,6 +807,26 @@
                         $adminLoginStatus.classList.add('text-red-400');
                     }
                 }
+            });
+        }
+
+        if ($adminLogout) {
+            $adminLogout.addEventListener('click', () => {
+                adminAutenticado = false;
+                try {
+                    localStorage.removeItem('ln_admin_authed');
+                } catch (err) {}
+                if ($adminLoginStatus) {
+                    $adminLoginStatus.textContent = '';
+                }
+                if ($adminStatus) {
+                    $adminStatus.textContent = '';
+                }
+                if ($adminLoginUser) $adminLoginUser.value = '';
+                if ($adminLoginPassword) $adminLoginPassword.value = '';
+                if ($adminContent) $adminContent.classList.add('hidden');
+                if ($adminLogin) $adminLogin.classList.add('hidden');
+                atualizarVisibilidadePainelAdmin();
             });
         }
 
@@ -753,6 +875,7 @@
                     $adminTypeCustom.classList.add('hidden');
                     $adminTypeCustom.value = '';
                 }
+                tutorialEmEdicaoId = null;
                 if ($adminStatus) {
                     $adminStatus.textContent = 'Edição cancelada.';
                     $adminStatus.classList.remove('text-red-400');
@@ -793,18 +916,40 @@
                     type = customTypeRaw.toUpperCase();
                 }
 
-                const novoTutorial = {
-                    id: String(Date.now()),
-                    title,
-                    excerpt,
-                    type,
-                    tags: tagsRaw.length ? tagsRaw : ['personalizado'],
-                    content
-                };
+                if (tutorialEmEdicaoId) {
+                    // Atualização de tutorial existente
+                    const atualizado = {
+                        id: tutorialEmEdicaoId,
+                        title,
+                        excerpt,
+                        type,
+                        tags: tagsRaw.length ? tagsRaw : ['personalizado'],
+                        content
+                    };
 
-                tutoriaisExtras.push(novoTutorial);
+                    const idxExtra = tutoriaisExtras.findIndex(t => t.id === tutorialEmEdicaoId);
+                    if (idxExtra >= 0) {
+                        tutoriaisExtras[idxExtra] = atualizado;
+                    } else {
+                        // Tutorial original vinha da base: cria sobrescrita
+                        tutoriaisExtras.push(atualizado);
+                    }
+                    tutorialEmEdicaoId = null;
+                } else {
+                    // Novo tutorial
+                    const novoTutorial = {
+                        id: String(Date.now()),
+                        title,
+                        excerpt,
+                        type,
+                        tags: tagsRaw.length ? tagsRaw : ['personalizado'],
+                        content
+                    };
+                    tutoriaisExtras.push(novoTutorial);
+                }
+
                 persistirTutoriaisExtras();
-                TUTORIAIS = [...TUTORIAIS_BASE, ...tutoriaisExtras];
+                TUTORIAIS = construirListaTutoriais();
 
                 atualizarUI();
 
