@@ -194,7 +194,7 @@
             <!-- Painel do Administrador -->
             <section id="admin-section" class="mt-12 border border-emerald-800 rounded-2xl p-4 bg-emerald-950/60">
                 <div class="flex items-center justify-between gap-2">
-                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors">
+                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors" onclick="toggleAdminPanel()">
                         <span>Painel do Administrador</span>
                         <span id="admin-toggle-icon">+</span>
                     </button>
@@ -869,28 +869,7 @@
         }
 
         // Área Administrativa / Painel do Administrador
-        if ($adminToggle) {
-            $adminToggle.addEventListener('click', () => {
-                const painelCadastroAberto = $adminContent && !$adminContent.classList.contains('hidden');
-                const painelLoginAberto = $adminLogin && !$adminLogin.classList.contains('hidden');
-                const painelAberto = painelCadastroAberto || painelLoginAberto;
-
-                // Se já está aberto, fecha tudo
-                if (painelAberto) {
-                    if ($adminContent) $adminContent.classList.add('hidden');
-                    if ($adminLogin) $adminLogin.classList.add('hidden');
-                    if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
-                } else {
-                    // Abrir conforme estado de autenticação
-                    if (adminAutenticado) {
-                        if ($adminContent) $adminContent.classList.remove('hidden');
-                    } else if ($adminLogin) {
-                        $adminLogin.classList.remove('hidden');
-                    }
-                    if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
-                }
-            });
-        }
+        // O evento é tratado pelo onclick direto no HTML + função global toggleAdminPanel()
 
         if ($adminLoginBtn) {
             $adminLoginBtn.addEventListener('click', (e) => {
@@ -1122,6 +1101,40 @@
                  }
             }
         });
+
+        // Função global para o botão admin (fallback)
+        function toggleAdminPanel() {
+            const $adminContent = document.getElementById('admin-content');
+            const $adminLogin = document.getElementById('admin-login');
+            const $adminToggleIcon = document.getElementById('admin-toggle-icon');
+            
+            const painelCadastroAberto = $adminContent && !$adminContent.classList.contains('hidden');
+            const painelLoginAberto = $adminLogin && !$adminLogin.classList.contains('hidden');
+            const painelAberto = painelCadastroAberto || painelLoginAberto;
+
+            // Verificar estado de autenticação do localStorage
+            let adminAuth = false;
+            try {
+                adminAuth = localStorage.getItem('ln_admin_authed') === 'true';
+            } catch (e) {
+                adminAuth = false;
+            }
+
+            // Se já está aberto, fecha tudo
+            if (painelAberto) {
+                if ($adminContent) $adminContent.classList.add('hidden');
+                if ($adminLogin) $adminLogin.classList.add('hidden');
+                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+            } else {
+                // Abrir conforme estado de autenticação
+                if (adminAuth) {
+                    if ($adminContent) $adminContent.classList.remove('hidden');
+                } else if ($adminLogin) {
+                    $adminLogin.classList.remove('hidden');
+                }
+                if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
+            }
+        }
 
         // Inicializar a UI
         atualizarUI();
