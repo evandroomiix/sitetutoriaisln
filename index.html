@@ -749,6 +749,14 @@
                 $breadcrumbSeparator2.classList.remove('hidden');
             }
 
+            // Verificar autenticação em tempo real
+            let adminAuth = false;
+            try {
+                adminAuth = localStorage.getItem('ln_admin_authed') === 'true';
+            } catch (e) {
+                adminAuth = false;
+            }
+
             $tutorialDetail.innerHTML = `
                 <div class="animate-in fade-in duration-500">
                     <div class="mb-6">
@@ -761,7 +769,7 @@
                         </span>
                         <h1 class="mt-2 text-3xl font-bold text-white">${tutorial.title}</h1>
                         <p class="mt-2 text-slate-400">${tutorial.excerpt}</p>
-                        ${adminAutenticado ? `
+                        ${adminAuth ? `
                         <button id="admin-edit-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-xs font-medium text-emerald-100 border border-emerald-700">
                             Editar este tutorial
                         </button>` : ''}
@@ -772,7 +780,7 @@
                 </div>
             `;
 
-            if (adminAutenticado) {
+            if (adminAuth) {
                 const $editBtn = document.getElementById('admin-edit-tutorial');
                 if ($editBtn) {
                     $editBtn.addEventListener('click', () => {
@@ -959,6 +967,14 @@
                 if ($adminContent) $adminContent.classList.add('hidden');
                 if ($adminLogin) $adminLogin.classList.add('hidden');
                 atualizarVisibilidadePainelAdmin();
+                
+                // Se estiver vendo detalhes de um tutorial, remover o botão de edição
+                if ($tutorialDetail.style.display !== 'none') {
+                    const $editBtn = document.getElementById('admin-edit-tutorial');
+                    if ($editBtn) {
+                        $editBtn.remove();
+                    }
+                }
             });
         }
 
