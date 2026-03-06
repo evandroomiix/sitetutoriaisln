@@ -960,7 +960,8 @@
         }
 
         // Event Listeners
-        $sidebarToggle.addEventListener('click', () => {
+        $sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evita que o clique propague para o document
             $sidebar.classList.toggle('-translate-x-full');
             $sidebarOverlay.classList.toggle('hidden');
         });
@@ -973,7 +974,7 @@
         document.addEventListener('click', (e) => {
             // Fecha sidebar se estiver aberto e clicar fora dele (apenas em mobile)
             if (window.innerWidth < 768 && 
-                !$sidebar.classList.contains('-translate-x-full') && 
+                $sidebar.classList.contains('translate-x-0') && 
                 !$sidebar.contains(e.target) && 
                 e.target !== $sidebarToggle) {
                 $sidebar.classList.add('-translate-x-full');
@@ -1335,9 +1336,13 @@
         // Adicionar listener para resize da janela
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 768) {
-                // Em desktop, sempre mostra o sidebar
+                // Em desktop, sempre mostra o sidebar e remove overlay
                 $sidebar.classList.remove('-translate-x-full');
                 $sidebarOverlay.classList.add('hidden');
+            } else {
+                // Em mobile, garante que o overlay esteja sincronizado com o estado do sidebar
+                const isSidebarOpen = !$sidebar.classList.contains('-translate-x-full');
+                $sidebarOverlay.classList.toggle('hidden', !isSidebarOpen);
             }
         });
 
