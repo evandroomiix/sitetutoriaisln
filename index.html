@@ -528,6 +528,40 @@
 
         let TUTORIAIS = construirListaTutoriais();
 
+        async function sincronizarComGitHub() {
+            if ($adminStatus) {
+                $adminStatus.innerHTML = `<div class="text-yellow-400">Sincronizando com o GitHub...</div>`;
+            }
+
+            try {
+                const response = await fetch('/api/update-tutorials', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tutorials: tutoriaisExtras }),
+                });
+
+                if (response.ok) {
+                    if ($adminStatus) {
+                        $adminStatus.innerHTML = `<div class="text-green-400">✅ Tutorial salvo e sincronizado com o GitHub!</div>`;
+                    }
+                    console.log('✅ Sincronização com o GitHub concluída com sucesso!');
+                } else {
+                    const errorData = await response.json();
+                    if ($adminStatus) {
+                        $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro na sincronização: ${errorData.message}</div>`;
+                    }
+                    console.error('❌ Erro na sincronização com o GitHub:', errorData);
+                }
+            } catch (error) {
+                if ($adminStatus) {
+                    $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro de rede ao tentar sincronizar.</div>`;
+                }
+                console.error('❌ Erro de rede:', error);
+            }
+        }
+
         function persistirTutoriaisExtras() {
             // Salva no localStorage e sessionStorage
             try {
@@ -539,20 +573,16 @@
                     detail: { tutoriais: tutoriaisExtras, timestamp: Date.now() }
                 }));
                 
-                // Mostra mensagem simples
-                if ($adminStatus) {
-                    $adminStatus.innerHTML = `
-                        <div class="text-green-400">✅ Tutorial salvo!</div>
-                        <div class="text-xs text-yellow-300 mt-1">
-                            Para sincronizar, copie os dados e atualize o arquivo no GitHub:
-                            <a href="https://github.com/evandroomiix/sitetutoriaisln/edit/main/tutoriais_custom.json" target="_blank" class="text-blue-400 underline">Abrir GitHub</a>
-                        </div>
-                    `;
-                }
-                
                 console.log('✅ Tutorial salvo localmente');
+
+                // Inicia a sincronização com o GitHub
+                sincronizarComGitHub();
+
             } catch (e) {
                 console.error('Erro ao salvar tutoriais', e);
+                if ($adminStatus) {
+                    $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro ao salvar o tutorial localmente.</div>`;
+                }
             }
         }
 
