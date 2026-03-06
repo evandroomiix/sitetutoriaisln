@@ -707,7 +707,7 @@
                     let previewUrl = mediaUrl;
                     const match = mediaUrl.match(/\/file\/d\/([^/]+)/);
                     if (match && match[1]) {
-                        previewUrl = \`https://drive.google.com/file/d/\${match[1]}/preview\`;
+                        previewUrl = `https://drive.google.com/file/d/${match[1]}/preview`;
                     }
                     partes.push(`
                         <div class="mb-6">
