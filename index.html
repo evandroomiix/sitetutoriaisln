@@ -311,22 +311,10 @@
     </div>
 
     <script>
-        // Função para configurar token automaticamente
+        // Função para configurar token automaticamente (Desativada por segurança)
         function configurarTokenGitHub() {
-            const token = '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';
-            try {
-                localStorage.setItem('github_sync_token', token);
-                console.log('✅ Token GitHub configurado com sucesso!');
-                alert('✅ Token GitHub configurado! A sincronização automática está ativada.');
-                
-                // Testar sincronização imediatamente
-                if (tutoriaisExtras.length > 0) {
-                    sincronizarComGitHub();
-                }
-            } catch (e) {
-                console.error('Erro ao configurar token:', e);
-                alert('❌ Erro ao configurar token. Tente manualmente no console.');
-            }
+            alert('❌ A configuração automática de token foi desativada por motivos de segurança.');
+            console.warn('A função configurarTokenGitHub() foi chamada, mas está desativada.');
         }
 
         // Função global para excluir tutorial (apenas admins)
