@@ -64,7 +64,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-950 font-sans text-slate-50 selection:bg-blue-500/30 flex flex-col">
+<body class="min-h-screen bg-slate-950 font-sans text-slate-50 selection:bg-green-500/30 flex flex-col">
 
     <!-- Navbar -->
     <header class="sticky top-0 z-10 bg-slate-900 border-b border-slate-800 px-4 py-3">
@@ -76,8 +76,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <!-- Logo ou Título -->
-                <h1 class="text-xl font-bold text-white">Tutoriais LN</h1>
+                <!-- Logo clicável -->
+                <a href="#" id="logo-link" class="flex items-center gap-2">
+                    <img src="assets/LOGO.png" alt="Tutoriais LN" class="h-8 w-auto">
+                    <span class="text-xl font-bold text-white">Tutoriais LN</span>
+                </a>
             </div>
 
             <!-- Barra de Busca -->
@@ -87,7 +90,7 @@
                         type="text"
                         id="search-input"
                         placeholder="Buscar tutoriais..."
-                        class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -142,6 +145,13 @@
                     <div class="animate-in fade-in duration-500 space-y-6">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-800/50">
                             <div>
+                                <nav class="text-xs text-slate-500 mb-1">
+                                    <a href="#" id="breadcrumb-home" class="hover:text-white">Início</a>
+                                    <span class="mx-1">/</span>
+                                    <span id="breadcrumb-section">Tutoriais</span>
+                                    <span id="breadcrumb-separator-2" class="mx-1 hidden">/</span>
+                                    <span id="breadcrumb-current" class="hidden"></span>
+                                </nav>
                                 <h1 id="page-title" class="text-3xl font-bold tracking-tight text-white mb-1">Todos os Conteúdos</h1>
                                 <p id="page-subtitle" class="text-slate-400 text-sm flex items-center gap-2">
                                     Explore nossos tutoriais e recursos
@@ -167,7 +177,7 @@
                             <p class="text-slate-500 text-center max-w-md mb-6">
                                 Não encontramos conteúdos com seus critérios. Tente limpar os filtros.
                             </p>
-                            <button id="clear-filters-btn" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-blue-900/20">
+                            <button id="clear-filters-btn" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-green-900/20">
                                 Limpar todos os filtros
                             </button>
                         </div>
@@ -179,6 +189,51 @@
                     <!-- Conteúdo detalhado será inserido aqui pelo JS -->
                 </div>
             </div>
+
+            <!-- Área Administrativa -->
+            <section id="admin-section" class="mt-12 border border-slate-800 rounded-2xl p-4 bg-slate-900/60">
+                <button id="admin-toggle" class="w-full flex items-center justify-between px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-100 rounded-xl text-sm font-medium transition-colors">
+                    <span>Área Administrativa</span>
+                    <span id="admin-toggle-icon">+</span>
+                </button>
+                <div id="admin-content" class="mt-4 space-y-4 hidden">
+                    <p class="text-xs text-slate-400">
+                        Preencha os campos abaixo para cadastrar novos tutoriais. Eles serão salvos apenas neste navegador.
+                    </p>
+                    <form id="admin-form" class="grid gap-4 md:grid-cols-2">
+                        <div class="md:col-span-2">
+                            <label for="admin-title" class="block text-xs font-medium text-slate-300 mb-1">Título</label>
+                            <input id="admin-title" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="admin-excerpt" class="block text-xs font-medium text-slate-300 mb-1">Resumo</label>
+                            <textarea id="admin-excerpt" rows="2" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required></textarea>
+                        </div>
+                        <div>
+                            <label for="admin-type" class="block text-xs font-medium text-slate-300 mb-1">Tipo</label>
+                            <select id="admin-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                <option value="TUTORIAL">Tutorial</option>
+                                <option value="ARTICLE">Artigo</option>
+                                <option value="VIDEO">Vídeo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="admin-tags" class="block text-xs font-medium text-slate-300 mb-1">Tags (separadas por vírgula)</label>
+                            <input id="admin-tags" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: vendas, estoque" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="admin-content-field" class="block text-xs font-medium text-slate-300 mb-1">Conteúdo (HTML simples)</label>
+                            <textarea id="admin-content-field" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="<p>Passo a passo...</p>" required></textarea>
+                        </div>
+                        <div class="md:col-span-2 flex items-center justify-between gap-4">
+                            <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                Salvar Tutorial
+                            </button>
+                            <p id="admin-status" class="text-xs text-slate-400"></p>
+                        </div>
+                    </form>
+                </div>
+            </section>
 
             <!-- Footer -->
             <footer class="mt-12 border-t border-slate-800/50 pt-6 pb-2">
@@ -197,8 +252,8 @@
     </div>
 
     <script>
-        // Dados dos Tutoriais (exemplo - substitua pelos seus dados reais)
-        const TUTORIAIS = [
+        // Dados base dos Tutoriais (fixos no código)
+        const TUTORIAIS_BASE = [
             {
                 id: '1',
                 title: 'Introdução ao Sistema LN',
@@ -241,6 +296,31 @@
             }
         ];
 
+        // Carrega tutoriais extras salvos no navegador
+        function carregarTutoriaisExtras() {
+            try {
+                const raw = localStorage.getItem('tutoriais_ln_custom');
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return [];
+                return parsed;
+            } catch (e) {
+                console.error('Erro ao carregar tutoriais salvos', e);
+                return [];
+            }
+        }
+
+        let tutoriaisExtras = carregarTutoriaisExtras();
+        let TUTORIAIS = [...TUTORIAIS_BASE, ...tutoriaisExtras];
+
+        function persistirTutoriaisExtras() {
+            try {
+                localStorage.setItem('tutoriais_ln_custom', JSON.stringify(tutoriaisExtras));
+            } catch (e) {
+                console.error('Erro ao salvar tutoriais', e);
+            }
+        }
+
         // Estados
         let estadoAtual = {
             tipo: 'ALL', // 'ALL', 'ARTICLE', 'VIDEO', 'TUTORIAL'
@@ -263,6 +343,21 @@
         const $tutorialList = document.getElementById('tutorial-list');
         const $tutorialDetail = document.getElementById('tutorial-detail');
         const $backButton = document.getElementById('back-button');
+        const $logoLink = document.getElementById('logo-link');
+        const $breadcrumbHome = document.getElementById('breadcrumb-home');
+        const $breadcrumbSection = document.getElementById('breadcrumb-section');
+        const $breadcrumbSeparator2 = document.getElementById('breadcrumb-separator-2');
+        const $breadcrumbCurrent = document.getElementById('breadcrumb-current');
+        const $adminToggle = document.getElementById('admin-toggle');
+        const $adminToggleIcon = document.getElementById('admin-toggle-icon');
+        const $adminContent = document.getElementById('admin-content');
+        const $adminForm = document.getElementById('admin-form');
+        const $adminStatus = document.getElementById('admin-status');
+        const $adminTitle = document.getElementById('admin-title');
+        const $adminExcerpt = document.getElementById('admin-excerpt');
+        const $adminType = document.getElementById('admin-type');
+        const $adminTags = document.getElementById('admin-tags');
+        const $adminContentField = document.getElementById('admin-content-field');
 
         // Função para obter todas as categorias únicas
         function obterCategorias() {
@@ -360,6 +455,11 @@
             $tutorialList.style.display = 'none';
             $tutorialDetail.style.display = 'block';
             $backButton.classList.remove('hidden'); // Mostra o botão voltar
+            if ($breadcrumbCurrent && $breadcrumbSeparator2) {
+                $breadcrumbCurrent.textContent = tutorial.title;
+                $breadcrumbCurrent.classList.remove('hidden');
+                $breadcrumbSeparator2.classList.remove('hidden');
+            }
 
             $tutorialDetail.innerHTML = `
                 <div class="animate-in fade-in duration-500">
@@ -386,6 +486,11 @@
             $tutorialList.style.display = 'block';
             $tutorialDetail.style.display = 'none';
             $backButton.classList.add('hidden'); // Esconde o botão voltar
+            if ($breadcrumbCurrent && $breadcrumbSeparator2) {
+                $breadcrumbCurrent.textContent = '';
+                $breadcrumbCurrent.classList.add('hidden');
+                $breadcrumbSeparator2.classList.add('hidden');
+            }
 
             // Rola para o topo
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -471,6 +576,80 @@
             $searchInput.value = '';
             atualizarUI();
         });
+
+        // Logo e breadcrumb "Início" levam para o topo e lista
+        if ($logoLink) {
+            $logoLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                voltarParaLista();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        if ($breadcrumbHome) {
+            $breadcrumbHome.addEventListener('click', (e) => {
+                e.preventDefault();
+                voltarParaLista();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Área Administrativa
+        if ($adminToggle && $adminContent) {
+            $adminToggle.addEventListener('click', () => {
+                const isHidden = $adminContent.classList.contains('hidden');
+                if (isHidden) {
+                    $adminContent.classList.remove('hidden');
+                    if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
+                } else {
+                    $adminContent.classList.add('hidden');
+                    if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+                }
+            });
+        }
+
+        if ($adminForm) {
+            $adminForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const title = $adminTitle.value.trim();
+                const excerpt = $adminExcerpt.value.trim();
+                const type = $adminType.value;
+                const tagsRaw = $adminTags.value.split(',').map(t => t.trim()).filter(Boolean);
+                const content = $adminContentField.value.trim();
+
+                if (!title || !excerpt || !content) {
+                    if ($adminStatus) {
+                        $adminStatus.textContent = 'Preencha título, resumo e conteúdo.';
+                        $adminStatus.classList.remove('text-green-400');
+                        $adminStatus.classList.add('text-red-400');
+                    }
+                    return;
+                }
+
+                const novoTutorial = {
+                    id: String(Date.now()),
+                    title,
+                    excerpt,
+                    type,
+                    tags: tagsRaw.length ? tagsRaw : ['personalizado'],
+                    content
+                };
+
+                tutoriaisExtras.push(novoTutorial);
+                persistirTutoriaisExtras();
+                TUTORIAIS = [...TUTORIAIS_BASE, ...tutoriaisExtras];
+
+                atualizarUI();
+
+                $adminForm.reset();
+                if ($adminStatus) {
+                    $adminStatus.textContent = 'Tutorial salvo com sucesso!';
+                    $adminStatus.classList.remove('text-red-400');
+                    $adminStatus.classList.add('text-green-400');
+                }
+            });
+        }
 
         // Clique em Card de Tutorial
         $tutorialsGrid.addEventListener('click', (e) => {
