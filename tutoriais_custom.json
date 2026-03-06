@@ -1,0 +1,15 @@
+{
+  "tutoriais": [
+    {
+      "id": "custom_1",
+      "title": "Tutorial Personalizado de Exemplo",
+      "excerpt": "Este é um exemplo de tutorial adicionado dinamicamente",
+      "type": "TUTORIAL",
+      "tags": ["exemplo", "personalizado"],
+      "content": "<p>Conteúdo detalhado do tutorial personalizado.</p><p>Este tutorial foi adicionado através do sistema online.</p>",
+      "mediaUrl": "",
+      "attachmentUrl": ""
+    }
+  ],
+  "ultimaAtualizacao": "2025-03-06T15:25:00.000Z"
+}
