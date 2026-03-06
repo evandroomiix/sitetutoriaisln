@@ -76,10 +76,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <!-- Logo clicável -->
-                <a href="#" id="logo-link" class="flex items-center gap-2">
+                <!-- Logo e Início -->
+                <a href="index.html" id="logo-link" class="flex items-center gap-2">
                     <img src="assets/LOGO.png" alt="Lojas Nordestina" class="h-8 w-auto">
                     <span class="text-xl font-bold text-white">Lojas Nordestina</span>
+                    <button class="ml-4 px-2 py-1 bg-emerald-800 hover:bg-emerald-700 text-white rounded text-xs font-medium transition-colors">
+                        Início
+                    </button>
                 </a>
             </div>
 
@@ -305,6 +308,43 @@
     </div>
 
     <script>
+        // Função global para excluir tutorial (apenas admins)
+        function excluirTutorial(tutorialId) {
+            // Verificar autenticação em tempo real
+            let adminAuth = false;
+            try {
+                adminAuth = localStorage.getItem('ln_admin_authed') === 'true';
+            } catch (e) {
+                adminAuth = false;
+            }
+
+            if (!adminAuth) {
+                alert('Apenas administradores podem excluir tutoriais.');
+                return;
+            }
+
+            if (!confirm('Tem certeza que deseja excluir este tutorial? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                // Remove do array de tutoriais extras
+                tutoriaisExtras = tutoriaisExtras.filter(t => t.id !== tutorialId);
+                
+                // Atualiza localStorage
+                localStorage.setItem('tutoriais_ln_custom', JSON.stringify(tutoriaisExtras));
+                
+                // Recarrega a UI
+                TUTORIAIS = construirListaTutoriais();
+                atualizarUI();
+                
+                console.log('Tutorial excluído com sucesso:', tutorialId);
+            } catch (e) {
+                console.error('Erro ao excluir tutorial:', e);
+                alert('Erro ao excluir tutorial. Tente novamente.');
+            }
+        }
+
         // Função global para o botão admin (deve estar fora do escopo do script principal)
         function toggleAdminPanel() {
             const $adminContent = document.getElementById('admin-content');
@@ -644,6 +684,10 @@
                     const card = document.createElement('div');
                     card.className = 'bg-emerald-950 border border-emerald-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl hover:shadow-green-900/10 transition-shadow cursor-pointer tutorial-card';
                     card.dataset.id = tutorial.id;
+                    
+                    // Verificar se é tutorial personalizado (não está na base fixa)
+                    const isCustomTutorial = !TUTORIAIS_BASE.some(base => base.id === tutorial.id);
+                    
                     card.innerHTML = `
                         <div class="p-5">
                             <div class="flex justify-between items-start">
@@ -654,6 +698,10 @@
                                 } border border-slate-700">
                                     ${tutorial.type}
                                 </span>
+                                ${isCustomTutorial && adminAutenticado ? `
+                                <button onclick="excluirTutorial('${tutorial.id}')" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium transition-colors">
+                                    🗑 Excluir
+                                </button>` : ''}
                             </div>
                             <h3 class="mt-3 text-lg font-semibold text-white line-clamp-2">${tutorial.title}</h3>
                             <p class="mt-2 text-slate-400 text-sm line-clamp-3">${tutorial.excerpt}</p>
@@ -982,16 +1030,16 @@
         if ($logoLink) {
             $logoLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                voltarParaLista();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Força a navegação para a home
+                window.location.href = 'index.html';
             });
         }
 
         if ($breadcrumbHome) {
             $breadcrumbHome.addEventListener('click', (e) => {
                 e.preventDefault();
-                voltarParaLista();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Força a navegação para a home
+                window.location.href = 'index.html';
             });
         }
 
