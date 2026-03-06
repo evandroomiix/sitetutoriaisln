@@ -255,8 +255,16 @@
                             <input id="admin-tags" type="text" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: vendas, estoque" />
                         </div>
                         <div class="md:col-span-2">
-                            <label for="admin-content-field" class="block text-xs font-medium text-slate-300 mb-1">Conteúdo (HTML simples)</label>
-                            <textarea id="admin-content-field" rows="4" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="<p>Passo a passo...</p>" required></textarea>
+                            <label for="admin-content-field" class="block text-xs font-medium text-slate-300 mb-1">Conteúdo (texto principal)</label>
+                            <textarea id="admin-content-field" rows="4" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Descreva aqui o passo a passo ou instruções em texto livre." required></textarea>
+                        </div>
+                        <div>
+                            <label for="admin-media-url" class="block text-xs font-medium text-slate-300 mb-1">Link de mídia (vídeo, imagem ou PDF)</label>
+                            <input id="admin-media-url" type="url" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ex: link de vídeo do Drive, imagem ou PDF (opcional)" />
+                        </div>
+                        <div>
+                            <label for="admin-attachment-url" class="block text-xs font-medium text-slate-300 mb-1">Link de anexo (opcional)</label>
+                            <input id="admin-attachment-url" type="url" class="w-full bg-emerald-950 border border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Documento adicional (texto, apresentação, etc.)" />
                         </div>
                         <div class="md:col-span-2 flex items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
@@ -418,6 +426,8 @@
         const $adminContentField = document.getElementById('admin-content-field');
         const $adminGenerateExcerpt = document.getElementById('admin-generate-excerpt');
         const $adminCancel = document.getElementById('admin-cancel');
+        const $adminMediaUrl = document.getElementById('admin-media-url');
+        const $adminAttachmentUrl = document.getElementById('admin-attachment-url');
 
         // Controle simples de autenticação do painel
         let adminAutenticado = false;
@@ -579,11 +589,98 @@
                 $adminContentField.value = tutorial.content || '';
             }
 
+            if ($adminMediaUrl) {
+                $adminMediaUrl.value = tutorial.mediaUrl || '';
+            }
+
+            if ($adminAttachmentUrl) {
+                $adminAttachmentUrl.value = tutorial.attachmentUrl || '';
+            }
+
             if ($adminStatus) {
                 $adminStatus.textContent = 'Editando tutorial existente. Ao salvar, ele será atualizado.';
                 $adminStatus.classList.remove('text-red-400');
                 $adminStatus.classList.add('text-green-400');
             }
+        }
+
+        function gerarHtmlConteudo(tutorial) {
+            const partes = [];
+            const content = tutorial.content || '';
+
+            if (content) {
+                let html;
+                if (content.includes('<p') || content.includes('<ul') || content.includes('<ol') || content.includes('<br')) {
+                    html = content;
+                } else {
+                    const escaped = content
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                    html = escaped.replace(/\n/g, '<br>');
+                }
+                partes.push(`<div class="mb-6 text-sm leading-relaxed text-slate-200">${html}</div>`);
+            }
+
+            const mediaUrlRaw = (tutorial.mediaUrl || '').trim();
+            if (mediaUrlRaw) {
+                const mediaUrl = mediaUrlRaw;
+                const lower = mediaUrl.toLowerCase();
+                if (lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png') || lower.endsWith('.gif') || lower.endsWith('.webp')) {
+                    partes.push(`
+                        <div class="mb-6">
+                            <img src="${mediaUrl}" alt="Mídia do tutorial" class="w-full max-h-[420px] object-contain rounded-xl border border-emerald-800 bg-black/20" />
+                        </div>
+                    `);
+                } else if (lower.endsWith('.mp4') || lower.endsWith('.webm') || lower.endsWith('.ogg')) {
+                    partes.push(`
+                        <div class="mb-6">
+                            <video controls class="w-full rounded-xl border border-emerald-800 bg-black">
+                                <source src="${mediaUrl}">
+                                Seu navegador não suporta vídeo incorporado.
+                            </video>
+                        </div>
+                    `);
+                } else if (lower.endsWith('.pdf')) {
+                    partes.push(`
+                        <div class="mb-6">
+                            <iframe src="${mediaUrl}" class="w-full h-96 rounded-xl border border-emerald-800 bg-black"></iframe>
+                        </div>
+                    `);
+                } else if (mediaUrl.includes('drive.google.com')) {
+                    let previewUrl = mediaUrl;
+                    const match = mediaUrl.match(/\/file\/d\/([^/]+)/);
+                    if (match && match[1]) {
+                        previewUrl = \`https://drive.google.com/file/d/\${match[1]}/preview\`;
+                    }
+                    partes.push(`
+                        <div class="mb-6">
+                            <iframe src="${previewUrl}" class="w-full h-96 rounded-xl border border-emerald-800 bg-black" allow="autoplay"></iframe>
+                        </div>
+                    `);
+                } else {
+                    partes.push(`
+                        <div class="mb-6 text-sm">
+                            <a href="${mediaUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-emerald-100 text-xs font-medium border border-emerald-700">
+                                Abrir mídia do tutorial
+                            </a>
+                        </div>
+                    `);
+                }
+            }
+
+            const attachmentUrlRaw = (tutorial.attachmentUrl || '').trim();
+            if (attachmentUrlRaw) {
+                partes.push(`
+                    <div class="mt-4 text-sm">
+                        <a href="${attachmentUrlRaw}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 text-xs font-medium border border-slate-600">
+                            Baixar anexo
+                        </a>
+                    </div>
+                `);
+            }
+
+            return partes.join('');
         }
 
         function renderizarDetalhe(tutorial) {
@@ -614,7 +711,7 @@
                         </button>` : ''}
                     </div>
                     <div class="prose prose-invert max-w-none">
-                        ${tutorial.content}
+                        ${gerarHtmlConteudo(tutorial)}
                     </div>
                 </div>
             `;
@@ -875,6 +972,8 @@
                     $adminTypeCustom.classList.add('hidden');
                     $adminTypeCustom.value = '';
                 }
+                if ($adminMediaUrl) $adminMediaUrl.value = '';
+                if ($adminAttachmentUrl) $adminAttachmentUrl.value = '';
                 tutorialEmEdicaoId = null;
                 if ($adminStatus) {
                     $adminStatus.textContent = 'Edição cancelada.';
@@ -894,6 +993,8 @@
                 const customTypeRaw = ($adminTypeCustom?.value || '').trim();
                 const tagsRaw = $adminTags.value.split(',').map(t => t.trim()).filter(Boolean);
                 const content = $adminContentField.value.trim();
+                const mediaUrl = ($adminMediaUrl?.value || '').trim();
+                const attachmentUrl = ($adminAttachmentUrl?.value || '').trim();
 
                 if (!title || !excerpt || !content) {
                     if ($adminStatus) {
@@ -924,7 +1025,9 @@
                         excerpt,
                         type,
                         tags: tagsRaw.length ? tagsRaw : ['personalizado'],
-                        content
+                        content,
+                        mediaUrl: mediaUrl || undefined,
+                        attachmentUrl: attachmentUrl || undefined
                     };
 
                     const idxExtra = tutoriaisExtras.findIndex(t => t.id === tutorialEmEdicaoId);
@@ -943,7 +1046,9 @@
                         excerpt,
                         type,
                         tags: tagsRaw.length ? tagsRaw : ['personalizado'],
-                        content
+                        content,
+                        mediaUrl: mediaUrl || undefined,
+                        attachmentUrl: attachmentUrl || undefined
                     };
                     tutoriaisExtras.push(novoTutorial);
                 }
