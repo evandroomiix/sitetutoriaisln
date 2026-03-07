@@ -1,20 +1,6 @@
 {
   "tutoriais": [
     {
-      "id": "custom_4",
-      "title": "Relatórios Financeiros",
-      "excerpt": "Como gerar e interpretar os principais relatórios financeiros",
-      "type": "TUTORIAL",
-      "tags": [
-        "relatórios",
-        "financeiro",
-        "análise"
-      ],
-      "content": "<p>Aprenda a gerar e analisar os relatórios financeiros do Sistema LN.</p><p><strong>Principais Relatórios:</strong></p><ul><li>Relatório de Vendas</li><li>Relatório de Contas a Receber</li><li>Relatório de Contas a Pagar</li><li>Fluxo de Caixa</li><li>Relatório de Lucratividade</li><li>Balanço Patrimonial</li></ul><p><strong>Como Gerar:</strong></p><ol><li>Acesse o módulo Financeiro</li><li>Selecione o período desejado</li><li>Escolha o tipo de relatório</li><li>Clique em 'Gerar Relatório'</li><li>Exporte em PDF ou Excel</li></ol><p><strong>Dicas de Análise:</strong></p><ul><li>Compare períodos diferentes</li><li>Analise tendências de vendas</li><li>Identifique oportunidades de melhoria</li><li>Monitore indicadores-chave</li></ul>",
-      "mediaUrl": "",
-      "attachmentUrl": ""
-    },
-    {
       "id": "custom_5",
       "title": "Segurança do Sistema",
       "excerpt": "Melhores práticas de segurança e proteção de dados",
@@ -40,5 +26,5 @@
       "content": "teste mozila"
     }
   ],
-  "ultimaAtualizacao": "2026-03-07T13:52:01.394Z"
+  "ultimaAtualizacao": "2026-03-07T13:52:02.965Z"
 }
