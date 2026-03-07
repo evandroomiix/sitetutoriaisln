@@ -1,15 +1,4 @@
 {
-  "tutoriais": [
-    {
-      "id": "1772889648470",
-      "title": "teste mozila",
-      "excerpt": "teste mozila",
-      "type": "TUTORIAL",
-      "tags": [
-        "teste mozila"
-      ],
-      "content": "teste mozila"
-    }
-  ],
-  "ultimaAtualizacao": "2026-03-07T13:52:04.558Z"
+  "tutoriais": [],
+  "ultimaAtualizacao": "2026-03-07T13:52:07.856Z"
 }
