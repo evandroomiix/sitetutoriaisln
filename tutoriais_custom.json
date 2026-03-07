@@ -1,20 +1,6 @@
 {
   "tutoriais": [
     {
-      "id": "custom_2",
-      "title": "Gestão de Estoque",
-      "excerpt": "Como gerenciar o estoque de produtos de forma eficiente",
-      "type": "ARTICLE",
-      "tags": [
-        "estoque",
-        "almoxarifado",
-        "gestão"
-      ],
-      "content": "<p>Aprenda a gerenciar o estoque da Lojas Nordestina de maneira prática e eficiente.</p><p><strong>Tópicos abordados:</strong></p><ul><li>Consulta de saldos em tempo real</li><li>Entrada e saída de produtos</li><li>Ajustes manuais de estoque</li><li>Relatórios de movimentação</li><li>Contagem cíclica (inventário)</li></ul><p><strong>Dicas:</strong></p><ul><li>Mantenha o estoque sempre atualizado</li><li>Realize conferências periódicas</li><li>Utilize códigos de barras para facilitar a localização</li></ul>",
-      "mediaUrl": "",
-      "attachmentUrl": ""
-    },
-    {
       "id": "custom_3",
       "title": "Atendimento ao Cliente",
       "excerpt": "Melhores práticas para atendimento e suporte ao cliente",
@@ -68,5 +54,5 @@
       "content": "teste mozila"
     }
   ],
-  "ultimaAtualizacao": "2026-03-07T13:50:31.435Z"
+  "ultimaAtualizacao": "2026-03-07T13:50:32.714Z"
 }
