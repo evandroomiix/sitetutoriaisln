@@ -402,48 +402,7 @@
         }
 
         // Dados base dos Tutoriais (fixos no código)
-        const TUTORIAIS_BASE = [
-            {
-                id: '1',
-                title: 'Introdução ao Sistema LN',
-                excerpt: 'Aprenda os conceitos básicos do sistema LN e suas principais funcionalidades.',
-                type: 'TUTORIAL',
-                tags: ['iniciante', 'sistema', 'conceitos'],
-                content: `<p>Este é o conteúdo detalhado do tutorial sobre a Introdução ao Sistema LN.</p><p>Ele aborda os seguintes tópicos:</p><ul><li>O que é o Sistema LN</li><li>Principais módulos</li><li>Benefícios do uso</li></ul>`
-            },
-            {
-                id: '2',
-                title: 'Como Criar um Novo Pedido',
-                excerpt: 'Passo a passo para criar um novo pedido no módulo de vendas.',
-                type: 'TUTORIAL',
-                tags: ['vendas', 'pedidos', 'módulo'],
-                content: `<p>Aqui está o guia detalhado para criar um novo pedido.</p><p>Siga os passos:</p><ol><li>Acesse o módulo de Vendas</li><li>Clique em "Novo Pedido"</li><li>Preencha as informações necessárias</li><li>Confirme o pedido</li></ol>`
-            },
-            {
-                id: '3',
-                title: 'Relatório de Estoque',
-                excerpt: 'Como gerar e interpretar o relatório de estoque.',
-                type: 'ARTICLE',
-                tags: ['estoque', 'relatórios', 'almoxarifado'],
-                content: `<p>Este artigo explica como gerar o relatório de estoque.</p><p>O relatório mostra:</p><ul><li>Quantidade disponível de cada item</li><li>Localização no almoxarifado</li><li>Data da última atualização</li></ul>`
-            },
-            {
-                id: '4',
-                title: 'Configurações de Usuário',
-                excerpt: 'Gerencie as permissões e configurações do seu usuário no sistema.',
-                type: 'TUTORIAL',
-                tags: ['usuário', 'segurança', 'administração'],
-                content: `<p>Este tutorial ensina a configurar seu usuário.</p><p>É possível:</p><ul><li>Alterar senha</li><li>Definir permissões</li><li>Gerenciar perfis</li></ul>`
-            },
-            {
-                id: '5',
-                title: 'Vídeo: Visão Geral do Módulo Financeiro',
-                excerpt: 'Vídeo demonstrativo sobre as funcionalidades do módulo financeiro.',
-                type: 'VIDEO',
-                tags: ['vídeo', 'financeiro', 'demonstração'],
-                content: `<p>Assista ao vídeo para uma visão geral do Módulo Financeiro.</p><p>[Aqui você pode embutir um player de vídeo ou linkar para o vídeo real]</p><p>Este vídeo cobre:</p><ul><li>Lançamentos financeiros</li><li>Relatórios de fluxo de caixa</li><li>Integração com contabilidade</li></ul>`
-            }
-        ];
+        const TUTORIAIS_BASE = [];
 
         // Carrega tutoriais extras do GitHub e localStorage
         async function carregarTutoriaisExtras() {
