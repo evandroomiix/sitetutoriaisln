@@ -1,6 +1,34 @@
 {
   "tutoriais": [
     {
+      "id": "custom_2",
+      "title": "Gestão de Estoque",
+      "excerpt": "Como gerenciar o estoque de produtos de forma eficiente",
+      "type": "ARTICLE",
+      "tags": [
+        "estoque",
+        "almoxarifado",
+        "gestão"
+      ],
+      "content": "<p>Aprenda a gerenciar o estoque da Lojas Nordestina de maneira prática e eficiente.</p><p><strong>Tópicos abordados:</strong></p><ul><li>Consulta de saldos em tempo real</li><li>Entrada e saída de produtos</li><li>Ajustes manuais de estoque</li><li>Relatórios de movimentação</li><li>Contagem cíclica (inventário)</li></ul><p><strong>Dicas:</strong></p><ul><li>Mantenha o estoque sempre atualizado</li><li>Realize conferências periódicas</li><li>Utilize códigos de barras para facilitar a localização</li></ul>",
+      "mediaUrl": "",
+      "attachmentUrl": ""
+    },
+    {
+      "id": "custom_3",
+      "title": "Atendimento ao Cliente",
+      "excerpt": "Melhores práticas para atendimento e suporte ao cliente",
+      "type": "ARTICLE",
+      "tags": [
+        "atendimento",
+        "cliente",
+        "suporte"
+      ],
+      "content": "<p>Guia completo sobre as melhores práticas de atendimento ao cliente na Lojas Nordestina.</p><p><strong>Objetivos:</strong></p><ul><li>Oferecer um atendimento de excelência</li><li>Resolver problemas de forma rápida e eficiente</li><li>Criar relacionamento de confiança com o cliente</li><li>Manter o profissionalismo em todas as interações</li></ul><p><strong>Comunicação Efetiva:</strong></p><ul><li>Escute ativamente as necessidades do cliente</li><li>Use linguagem clara e objetiva</li><li>Seja empático e paciente</li><li>Ofereça soluções proativas</li></ul><p><strong>Tratamento de Reclamações:</strong></p><ul><li>Acolha o cliente com respeito</li><li>Entenda o problema antes de propor solução</li><li>Documente todas as interações</li><li>Ofereça alternativas quando necessário</li></ul>",
+      "mediaUrl": "",
+      "attachmentUrl": ""
+    },
+    {
       "id": "custom_4",
       "title": "Relatórios Financeiros",
       "excerpt": "Como gerar e interpretar os principais relatórios financeiros",
@@ -40,5 +68,5 @@
       "content": "teste mozila"
     }
   ],
-  "ultimaAtualizacao": "2026-03-07T13:51:42.329Z"
+  "ultimaAtualizacao": "2026-03-07T13:51:57.410Z"
 }
