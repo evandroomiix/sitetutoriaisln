@@ -62,12 +62,38 @@
         .back-button {
             display: none; /* Inicialmente escondido */
         }
+        /* Animação Aurora (Blobs) */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 10s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-900/40 via-slate-950 to-slate-950 font-sans text-slate-50 selection:bg-green-500/30 flex flex-col">
+<body class="min-h-screen bg-slate-950 font-sans text-slate-50 selection:bg-green-500/30 flex flex-col relative overflow-x-hidden">
+
+    <!-- Background Aurora Effect -->
+    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <!-- Luz Verde Principal -->
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl animate-blob mix-blend-screen"></div>
+        <!-- Luz Azul Secundária (para contraste) -->
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl animate-blob animation-delay-2000 mix-blend-screen"></div>
+        <!-- Luz Verde Inferior -->
+        <div class="absolute -bottom-32 left-1/3 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-blob animation-delay-4000 mix-blend-screen"></div>
+    </div>
 
     <!-- Navbar -->
-    <header class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-emerald-900/50 px-4 py-3 supports-[backdrop-filter]:bg-slate-950/60">
+    <header class="sticky top-0 z-30 bg-slate-950/70 backdrop-blur-xl border-b border-white/5 px-4 py-3 supports-[backdrop-filter]:bg-slate-950/60">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <!-- Botão para abrir o Sidebar (Mobile) -->
@@ -110,17 +136,17 @@
 
     <div class="flex flex-1">
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-slate-950/50 backdrop-blur-sm border-r border-emerald-900/50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-20 w-64 bg-slate-950/40 backdrop-blur-xl border-r border-white/5 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <div class="p-4">
                 <h2 class="text-lg font-semibold text-white mb-4">Filtros</h2>
 
                 <div class="mb-6">
                     <h3 class="text-sm font-medium text-slate-400 mb-2">Tipo de Conteúdo</h3>
                     <div class="space-y-2">
-                        <button data-type="ALL" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-900 text-slate-300 hover:text-white transition-colors">Todos</button>
-                        <button data-type="ARTICLE" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-900 text-slate-300 hover:text-white transition-colors">Artigos</button>
-                        <button data-type="VIDEO" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-900 text-slate-300 hover:text-white transition-colors">Vídeos</button>
-                        <button data-type="TUTORIAL" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-900 text-slate-300 hover:text-white transition-colors">Tutoriais</button>
+                        <button data-type="ALL" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-all border border-transparent hover:border-white/10">Todos</button>
+                        <button data-type="ARTICLE" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-all border border-transparent hover:border-white/10">Artigos</button>
+                        <button data-type="VIDEO" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-all border border-transparent hover:border-white/10">Vídeos</button>
+                        <button data-type="TUTORIAL" class="filter-type-btn w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 text-slate-300 hover:text-white transition-all border border-transparent hover:border-white/10">Tutoriais</button>
                     </div>
                 </div>
 
@@ -140,7 +166,7 @@
         <main class="flex-1 flex flex-col px-4 py-8 md:px-8 max-w-full overflow-x-hidden">
             <div class="flex-1">
                 <!-- Botão Voltar (para quando estiver vendo detalhes) -->
-                <button id="back-button" class="back-button mb-4 px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-white rounded-lg transition-colors">
+                <button id="back-button" class="back-button mb-4 px-4 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-100 rounded-lg transition-colors backdrop-blur-sm">
                     &larr; Voltar
                 </button>
 
@@ -161,7 +187,7 @@
                                     Explore nossos tutoriais e recursos
                                 </p>
                             </div>
-                            <div id="result-count" class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-950 border border-emerald-800 text-xs font-medium text-slate-400">
+                            <div id="result-count" class="inline-flex items-center px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-slate-400 backdrop-blur-sm">
                                 <!-- Número de resultados será inserido aqui -->
                             </div>
                         </div>
@@ -195,9 +221,9 @@
             </div>
 
             <!-- Painel do Administrador -->
-            <section id="admin-section" class="mt-12 border border-emerald-800 rounded-2xl p-4 bg-emerald-950/60">
+            <section id="admin-section" class="mt-12 border border-white/10 rounded-2xl p-4 bg-slate-900/40 backdrop-blur-md">
                 <div class="flex items-center justify-between gap-2">
-                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-emerald-950 hover:bg-emerald-900 text-slate-100 rounded-xl text-sm font-medium transition-colors" onclick="toggleAdminPanel()">
+                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/5 text-slate-100 rounded-xl text-sm font-medium transition-colors" onclick="toggleAdminPanel()">
                         <span>Painel do Administrador</span>
                         <span id="admin-toggle-icon">+</span>
                     </button>
@@ -731,8 +757,8 @@
 
             categorias.forEach(cat => {
                 const btn = document.createElement('button');
-                btn.className = `filter-category-btn w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-900 transition-colors ${
-                    estadoAtual.categoria === cat ? 'bg-emerald-900 text-white' : 'text-slate-300 hover:text-white'
+                btn.className = `filter-category-btn w-full text-left px-3 py-2 rounded-lg hover:bg-white/5 transition-all border border-transparent ${
+                    estadoAtual.categoria === cat ? 'bg-emerald-600/20 text-emerald-100 border-emerald-500/30' : 'text-slate-300 hover:text-white hover:border-white/10'
                 }`;
                 btn.textContent = cat === 'all' ? 'Todas' : cat.charAt(0).toUpperCase() + cat.slice(1);
                 btn.dataset.category = cat;
@@ -769,7 +795,7 @@
 
                 tutoriaisFiltrados.forEach(tutorial => {
                     const card = document.createElement('div');
-                    card.className = 'group bg-slate-900/50 backdrop-blur-sm border border-emerald-900/50 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer tutorial-card';
+                    card.className = 'group bg-slate-900/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 hover:bg-slate-800/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer tutorial-card';
                     card.dataset.id = tutorial.id;
                     
                     // Verificar se é tutorial personalizado (não está na base fixa)
@@ -779,9 +805,9 @@
                         <div class="p-5">
                             <div class="flex justify-between items-start">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                    tutorial.type === 'ARTICLE' ? 'bg-green-900/30 text-green-400' :
-                                    tutorial.type === 'VIDEO' ? 'bg-purple-900/30 text-purple-400' :
-                                    'bg-green-900/30 text-green-400'
+                                    tutorial.type === 'ARTICLE' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' :
+                                    tutorial.type === 'VIDEO' ? 'bg-blue-500/10 text-blue-300 border border-blue-500/20' :
+                                    'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
                                 } border border-slate-700">
                                     ${tutorial.type}
                                 </span>
@@ -793,7 +819,7 @@
                             <h3 class="mt-3 text-lg font-semibold text-white group-hover:text-emerald-400 transition-colors line-clamp-2">${tutorial.title}</h3>
                             <p class="mt-2 text-slate-400 text-sm line-clamp-3">${tutorial.excerpt}</p>
                             <div class="mt-4 flex flex-wrap gap-1">
-                                ${tutorial.tags.map(tag => `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-emerald-950/50 border border-emerald-900/50 text-emerald-200">${tag}</span>`).join('')}
+                                ${tutorial.tags.map(tag => `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/5 border border-white/10 text-slate-300">${tag}</span>`).join('')}
                             </div>
                         </div>
                     `;
@@ -1040,13 +1066,15 @@
 
             // Atualiza classes ativas nos botões de filtro
             document.querySelectorAll('.filter-type-btn').forEach(btn => {
-                btn.classList.toggle('bg-emerald-900', btn.dataset.type === estadoAtual.tipo);
-                btn.classList.toggle('text-white', btn.dataset.type === estadoAtual.tipo);
+                btn.classList.toggle('bg-emerald-600/20', btn.dataset.type === estadoAtual.tipo);
+                btn.classList.toggle('text-emerald-100', btn.dataset.type === estadoAtual.tipo);
+                btn.classList.toggle('border-emerald-500/30', btn.dataset.type === estadoAtual.tipo);
             });
 
             document.querySelectorAll('.filter-category-btn').forEach(btn => {
-                btn.classList.toggle('bg-emerald-900', btn.dataset.category === estadoAtual.categoria);
-                btn.classList.toggle('text-white', btn.dataset.category === estadoAtual.categoria);
+                btn.classList.toggle('bg-emerald-600/20', btn.dataset.category === estadoAtual.categoria);
+                btn.classList.toggle('text-emerald-100', btn.dataset.category === estadoAtual.categoria);
+                btn.classList.toggle('border-emerald-500/30', btn.dataset.category === estadoAtual.categoria);
             });
         }
 
