@@ -1,21 +1,6 @@
 {
   "tutoriais": [
     {
-      "id": "custom_5",
-      "title": "Segurança do Sistema",
-      "excerpt": "Melhores práticas de segurança e proteção de dados",
-      "type": "ARTICLE",
-      "tags": [
-        "segurança",
-        "proteção",
-        "dados",
-        "senha"
-      ],
-      "content": "<p>Guia essencial sobre segurança de dados e boas práticas no Sistema LN.</p><p><strong>Política de Senhas:</strong></p><ul><li>Use senhas fortes com no mínimo 8 caracteres</li><li>Combine letras, números e caracteres especiais</li><li>Troque a senha a cada 90 dias</li><li>Não compartilhe senhas com outros usuários</li><li>Evite informações pessoais em senhas</li></ul><p><strong>Acesso ao Sistema:</strong></p><ul><li>Faça logout sempre que terminar de usar</li><li>Não mantenha sessões abertas em computadores compartilhados</li><li>Reporte atividades suspeitas imediatamente</li><li>Use a autenticação de dois fatores quando disponível</li></ul><p><strong>Proteção de Dados:</strong></p><ul><li>Faça backup regularmente</li><li>Use criptografia em dados sensíveis</li><li>Mantenha o antivírus atualizado</li><li>Evite Wi-Fi públicas para acessar o sistema</li><li>Documente e classifique as informações adequadamente</li></ul>",
-      "mediaUrl": "",
-      "attachmentUrl": ""
-    },
-    {
       "id": "1772889648470",
       "title": "teste mozila",
       "excerpt": "teste mozila",
@@ -26,5 +11,5 @@
       "content": "teste mozila"
     }
   ],
-  "ultimaAtualizacao": "2026-03-07T13:52:02.965Z"
+  "ultimaAtualizacao": "2026-03-07T13:52:04.558Z"
 }
