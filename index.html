@@ -83,6 +83,11 @@
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 selection:bg-green-500/30 flex flex-col relative overflow-x-hidden transition-colors duration-300">
 
+    <!-- Barra de Progresso de Leitura -->
+    <div id="reading-progress" class="fixed top-0 left-0 w-full h-1 z-50 hidden">
+        <div id="reading-bar" class="h-full bg-gradient-to-r from-emerald-400 to-green-600 w-0 shadow-[0_0_10px_rgba(16,185,129,0.7)] transition-all duration-75 ease-out"></div>
+    </div>
+
     <!-- Background Aurora Effect -->
     <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <!-- Luz Verde Principal -->
@@ -322,6 +327,10 @@
                         <div>
                             <label for="admin-attachment-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Link de anexo (opcional)</label>
                             <input id="admin-attachment-url" type="url" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Documento adicional (texto, apresentação, etc.)" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <input type="checkbox" id="admin-featured" class="w-4 h-4 text-green-600 bg-slate-100 border-slate-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-emerald-950 dark:border-emerald-800 align-middle">
+                            <label for="admin-featured" class="ml-2 text-sm font-medium text-slate-600 dark:text-slate-300 align-middle">Destacar este tutorial (aparece no topo da lista)</label>
                         </div>
                         <div class="md:col-span-2 flex items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
@@ -718,6 +727,9 @@
         const $adminCancel = document.getElementById('admin-cancel');
         const $adminMediaUrl = document.getElementById('admin-media-url');
         const $adminAttachmentUrl = document.getElementById('admin-attachment-url');
+        const $adminFeatured = document.getElementById('admin-featured');
+        const $readingProgress = document.getElementById('reading-progress');
+        const $readingBar = document.getElementById('reading-bar');
         
         // Elementos do Token
         const $githubTokenInput = document.getElementById('github-token-input');
@@ -839,15 +851,25 @@
                 $noResults.classList.add('hidden');
                 $tutorialsGrid.classList.remove('hidden');
 
-                tutoriaisFiltrados.forEach(tutorial => {
+                // Separar destaques e normais
+                const destaques = tutoriaisFiltrados.filter(t => t.featured);
+                const normais = tutoriaisFiltrados.filter(t => !t.featured);
+
+                // Função auxiliar para criar o HTML do card
+                const criarCardHTML = (tutorial, isFeatured) => {
                     const card = document.createElement('div');
-                    card.className = 'group bg-white/80 dark:bg-slate-900/40 backdrop-blur-md border border-slate-200 dark:border-white/5 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 dark:hover:bg-slate-800/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer tutorial-card';
+                    const borderClass = isFeatured 
+                        ? 'border-emerald-500/50 dark:border-emerald-500/50 shadow-emerald-500/10 ring-1 ring-emerald-500/20' 
+                        : 'border-slate-200 dark:border-white/5';
+                    
+                    card.className = `group bg-white/80 dark:bg-slate-900/40 backdrop-blur-md border ${borderClass} rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 dark:hover:bg-slate-800/50 hover:-translate-y-1 transition-all duration-300 cursor-pointer tutorial-card relative`;
                     card.dataset.id = tutorial.id;
                     
                     // Verificar se é tutorial personalizado (não está na base fixa)
                     const isCustomTutorial = !TUTORIAIS_BASE.some(base => base.id === tutorial.id);
                     
                     card.innerHTML = `
+                        ${isFeatured ? '<div class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">DESTAQUE</div>' : ''}
                         <div class="p-5">
                             <div class="flex justify-between items-start">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -869,8 +891,37 @@
                             </div>
                         </div>
                     `;
-                    $tutorialsGrid.appendChild(card);
-                });
+                    return card;
+                };
+
+                // Renderizar Destaques
+                if (destaques.length > 0) {
+                    const headerDestaques = document.createElement('div');
+                    headerDestaques.className = 'col-span-full flex items-center gap-2 mb-2 mt-1';
+                    headerDestaques.innerHTML = `
+                        <span class="text-xl">🔥</span>
+                        <h2 class="text-xl font-bold text-slate-800 dark:text-white">Destaques</h2>
+                        <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800 ml-4"></div>
+                    `;
+                    $tutorialsGrid.appendChild(headerDestaques);
+
+                    destaques.forEach(t => $tutorialsGrid.appendChild(criarCardHTML(t, true)));
+                }
+
+                // Renderizar Normais
+                if (normais.length > 0) {
+                    if (destaques.length > 0) {
+                        const headerNormais = document.createElement('div');
+                        headerNormais.className = 'col-span-full flex items-center gap-2 mb-2 mt-6';
+                        headerNormais.innerHTML = `
+                            <span class="text-xl">📚</span>
+                            <h2 class="text-xl font-bold text-slate-800 dark:text-white">Todos os Tutoriais</h2>
+                            <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800 ml-4"></div>
+                        `;
+                        $tutorialsGrid.appendChild(headerNormais);
+                    }
+                    normais.forEach(t => $tutorialsGrid.appendChild(criarCardHTML(t, false)));
+                }
             }
 
             // Atualiza contador de resultados
@@ -925,6 +976,10 @@
 
             if ($adminAttachmentUrl) {
                 $adminAttachmentUrl.value = tutorial.attachmentUrl || '';
+            }
+            
+            if ($adminFeatured) {
+                $adminFeatured.checked = !!tutorial.featured;
             }
 
             if ($adminStatus) {
@@ -1032,6 +1087,7 @@
         function renderizarDetalhe(tutorial) {
             $tutorialList.style.display = 'none';
             $tutorialDetail.style.display = 'block';
+            if ($readingProgress) $readingProgress.classList.remove('hidden'); // Mostra barra de progresso
             $backButton.classList.remove('hidden'); // Mostra o botão voltar
             if ($breadcrumbCurrent && $breadcrumbSeparator2) {
                 $breadcrumbCurrent.textContent = tutorial.title;
@@ -1093,6 +1149,7 @@
         function voltarParaLista() {
             $tutorialList.style.display = 'block';
             $tutorialDetail.style.display = 'none';
+            if ($readingProgress) $readingProgress.classList.add('hidden'); // Esconde barra de progresso
             $backButton.classList.add('hidden'); // Esconde o botão voltar
             if ($breadcrumbCurrent && $breadcrumbSeparator2) {
                 $breadcrumbCurrent.textContent = '';
@@ -1146,6 +1203,16 @@
                 e.target !== $sidebarToggle) {
                 $sidebar.classList.add('-translate-x-full');
                 $sidebarOverlay.classList.add('hidden');
+            }
+        });
+
+        // Listener de Scroll para Barra de Progresso
+        window.addEventListener('scroll', () => {
+            if ($tutorialDetail.style.display !== 'none' && $readingBar) {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+                $readingBar.style.width = `${progress}%`;
             }
         });
 
@@ -1319,6 +1386,7 @@
                     $adminTypeCustom.classList.add('hidden');
                     $adminTypeCustom.value = '';
                 }
+                if ($adminFeatured) $adminFeatured.checked = false;
                 if ($adminMediaUrl) $adminMediaUrl.value = '';
                 if ($adminAttachmentUrl) $adminAttachmentUrl.value = '';
                 tutorialEmEdicaoId = null;
@@ -1342,6 +1410,7 @@
                 const content = $adminContentField.value.trim();
                 const mediaUrl = ($adminMediaUrl?.value || '').trim();
                 const attachmentUrl = ($adminAttachmentUrl?.value || '').trim();
+                const isFeatured = $adminFeatured ? $adminFeatured.checked : false;
 
                 if (!title || !excerpt || !content) {
                     if ($adminStatus) {
@@ -1374,7 +1443,8 @@
                         tags: tagsRaw.length ? tagsRaw : ['personalizado'],
                         content,
                         mediaUrl: mediaUrl || undefined,
-                        attachmentUrl: attachmentUrl || undefined
+                        attachmentUrl: attachmentUrl || undefined,
+                        featured: isFeatured
                     };
 
                     const idxExtra = tutoriaisExtras.findIndex(t => t.id === tutorialEmEdicaoId);
@@ -1395,7 +1465,8 @@
                         tags: tagsRaw.length ? tagsRaw : ['personalizado'],
                         content,
                         mediaUrl: mediaUrl || undefined,
-                        attachmentUrl: attachmentUrl || undefined
+                        attachmentUrl: attachmentUrl || undefined,
+                        featured: isFeatured
                     };
                     tutoriaisExtras.push(novoTutorial);
                 }
