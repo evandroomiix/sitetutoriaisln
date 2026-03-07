@@ -449,7 +449,8 @@
         async function carregarTutoriaisExtras() {
             try {
                 // Primeiro carrega do GitHub (fonte oficial)
-                const response = await fetch('https://raw.githubusercontent.com/evandroomiix/sitetutoriaisln/main/tutoriais_custom.json');
+                // Adicionamos ?t=Date.now() para evitar que o navegador use a versão antiga (cache)
+                const response = await fetch(`https://raw.githubusercontent.com/evandroomiix/sitetutoriaisln/main/tutoriais_custom.json?t=${Date.now()}`);
                 let githubTutoriais = [];
                 if (response.ok) {
                     const data = await response.json();
