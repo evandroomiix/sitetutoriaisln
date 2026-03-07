@@ -351,14 +351,14 @@
                 // Remove do array de tutoriais extras
                 tutoriaisExtras = tutoriaisExtras.filter(t => t.id !== tutorialId);
                 
-                // Atualiza localStorage
-                localStorage.setItem('tutoriais_ln_custom', JSON.stringify(tutoriaisExtras));
+                // Persiste a mudança (local e GitHub)
+                persistirTutoriaisExtras();
                 
                 // Recarrega a UI
                 TUTORIAIS = construirListaTutoriais();
                 atualizarUI();
                 
-                console.log('Tutorial excluído com sucesso:', tutorialId);
+                console.log('Exclusão iniciada e sincronizando com GitHub:', tutorialId);
             } catch (e) {
                 console.error('Erro ao excluir tutorial:', e);
                 alert('Erro ao excluir tutorial. Tente novamente.');
