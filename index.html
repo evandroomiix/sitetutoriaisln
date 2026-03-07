@@ -227,6 +227,17 @@
                     <p id="admin-login-status" class="text-xs text-red-400"></p>
                 </div>
                 <div id="admin-content" class="mt-4 space-y-4 hidden">
+                    <!-- Configuração do Token GitHub -->
+                    <div class="bg-slate-900/50 border border-slate-700 rounded-lg p-4 mb-4">
+                        <h3 class="text-sm font-bold text-white mb-2">⚙️ Configuração de Sincronização</h3>
+                        <p class="text-xs text-slate-400 mb-3">Para salvar automaticamente no GitHub, insira seu Token de Acesso Pessoal (Classic) abaixo uma única vez.</p>
+                        <div class="flex gap-2">
+                            <input id="github-token-input" type="password" class="flex-1 bg-slate-950 border border-slate-700 rounded px-3 py-1 text-sm text-white focus:outline-none focus:border-green-500" placeholder="Cole seu Token aqui (ghp_...)" />
+                            <button id="save-token-btn" type="button" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-medium transition-colors">Salvar Token</button>
+                        </div>
+                        <p id="token-status" class="text-xs mt-2 text-slate-500"></p>
+                    </div>
+
                     <div class="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4">
                         <p class="text-xs text-blue-300">
                             <strong>� Sistema Simples:</strong> Tutoriais salvos localmente. 
@@ -529,36 +540,76 @@
         let TUTORIAIS = construirListaTutoriais();
 
         async function sincronizarComGitHub() {
-            if ($adminStatus) {
-                $adminStatus.innerHTML = `<div class="text-yellow-400">Sincronizando com o GitHub...</div>`;
+            const token = localStorage.getItem('ln_github_token');
+            
+            if (!token) {
+                if ($adminStatus) {
+                    $adminStatus.innerHTML = `<div class="text-yellow-400">⚠️ Configure o Token do GitHub acima para salvar online.</div>`;
+                }
+                return;
             }
 
+            if ($adminStatus) {
+                $adminStatus.innerHTML = `<div class="text-yellow-400">Conectando ao GitHub...</div>`;
+            }
+
+            const REPO_OWNER = 'evandroomiix';
+            const REPO_NAME = 'sitetutoriaisln';
+            const FILE_PATH = 'tutoriais_custom.json';
+            const API_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
             try {
-                const response = await fetch('/api/update-tutorials', {
-                    method: 'POST',
+                // 1. Obter o arquivo atual para pegar o SHA (necessário para atualizar)
+                const getResponse = await fetch(API_URL, {
                     headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ tutorials: tutoriaisExtras }),
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
 
-                if (response.ok) {
+                let sha = null;
+                if (getResponse.ok) {
+                    const data = await getResponse.json();
+                    sha = data.sha;
+                } else if (getResponse.status !== 404) {
+                    throw new Error('Erro ao conectar com GitHub. Verifique seu Token.');
+                }
+
+                // 2. Preparar o conteúdo em Base64 (padrão do GitHub)
+                // btoa(unescape(encodeURIComponent(str))) resolve problemas de acentuação
+                const contentJson = JSON.stringify({ tutoriais: tutoriaisExtras, ultimaAtualizacao: new Date().toISOString() }, null, 2);
+                const contentBase64 = btoa(unescape(encodeURIComponent(contentJson)));
+
+                // 3. Enviar atualização (PUT)
+                const putResponse = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'Atualização via Painel Admin do Site',
+                        content: contentBase64,
+                        sha: sha
+                    })
+                });
+
+                if (putResponse.ok) {
                     if ($adminStatus) {
-                        $adminStatus.innerHTML = `<div class="text-green-400">✅ Tutorial salvo e sincronizado com o GitHub!</div>`;
+                        $adminStatus.innerHTML = `<div class="text-green-400">✅ Salvo no GitHub com sucesso!</div>`;
                     }
-                    console.log('✅ Sincronização com o GitHub concluída com sucesso!');
+                    console.log('✅ Sincronização com o GitHub concluída!');
                 } else {
-                    const errorData = await response.json();
-                    if ($adminStatus) {
-                        $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro na sincronização: ${errorData.message}</div>`;
-                    }
-                    console.error('❌ Erro na sincronização com o GitHub:', errorData);
+                    const err = await putResponse.json();
+                    throw new Error(err.message || 'Erro ao salvar');
                 }
+
             } catch (error) {
+                console.error(error);
                 if ($adminStatus) {
-                    $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro de rede ao tentar sincronizar.</div>`;
+                    $adminStatus.innerHTML = `<div class="text-red-400">❌ Erro: ${error.message}</div>`;
                 }
-                console.error('❌ Erro de rede:', error);
             }
         }
 
@@ -635,6 +686,31 @@
         const $adminCancel = document.getElementById('admin-cancel');
         const $adminMediaUrl = document.getElementById('admin-media-url');
         const $adminAttachmentUrl = document.getElementById('admin-attachment-url');
+        
+        // Elementos do Token
+        const $githubTokenInput = document.getElementById('github-token-input');
+        const $saveTokenBtn = document.getElementById('save-token-btn');
+        const $tokenStatus = document.getElementById('token-status');
+
+        // Carregar token salvo
+        const savedToken = localStorage.getItem('ln_github_token');
+        if (savedToken && $githubTokenInput) {
+            $githubTokenInput.value = savedToken;
+            if ($tokenStatus) $tokenStatus.textContent = 'Token configurado ✅';
+        }
+
+        if ($saveTokenBtn) {
+            $saveTokenBtn.addEventListener('click', () => {
+                const token = ($githubTokenInput.value || '').trim();
+                if (token) {
+                    localStorage.setItem('ln_github_token', token);
+                    if ($tokenStatus) {
+                        $tokenStatus.textContent = 'Token salvo! Agora você pode salvar tutoriais.';
+                        $tokenStatus.className = 'text-xs mt-2 text-green-400';
+                    }
+                }
+            });
+        }
 
         // Controle simples de autenticação do painel
         let adminAutenticado = false;
