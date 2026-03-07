@@ -1,20 +1,6 @@
 {
   "tutoriais": [
     {
-      "id": "custom_1",
-      "title": "Como Criar Novos Pedidos",
-      "excerpt": "Passo a passo para criar novos pedidos no sistema",
-      "type": "TUTORIAL",
-      "tags": [
-        "vendas",
-        "pedidos",
-        "sistema"
-      ],
-      "content": "<p>Este tutorial ensina o processo completo para criação de novos pedidos no Sistema LN.</p><p>Siga os passos abaixo:</p><ol><li>Acesse o módulo de Vendas</li><li>Clique em 'Novo Pedido'</li><li>Preencha todos os campos obrigatórios</li><li>Selecione o cliente e os produtos</li><li>Confirme as informações</li><li>Salve o pedido</li></ol><p><strong>Importante:</strong> Verifique sempre o estoque disponível antes de confirmar o pedido.</p>",
-      "mediaUrl": "",
-      "attachmentUrl": ""
-    },
-    {
       "id": "custom_2",
       "title": "Gestão de Estoque",
       "excerpt": "Como gerenciar o estoque de produtos de forma eficiente",
@@ -82,5 +68,5 @@
       "content": "teste mozila"
     }
   ],
-  "ultimaAtualizacao": "2026-03-07T13:20:48.837Z"
+  "ultimaAtualizacao": "2026-03-07T13:50:31.435Z"
 }
