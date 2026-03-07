@@ -142,6 +142,12 @@
                     <!-- Ícone Lua (Dark) -->
                     <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                 </button>
+                <!-- Botão Admin Panel Modal -->
+                <button id="admin-modal-trigger" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors border border-slate-200 dark:border-slate-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-1 1-1 1H6v2H2v-4l4.257-4.257A6 6 0 1118 8zm-6-4a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd" />
+                    </svg>
+                </button>
             </div>
         </div>
     </header>
@@ -232,121 +238,6 @@
                 </div>
             </div>
 
-            <!-- Painel do Administrador -->
-            <section id="admin-section" class="mt-12 border border-slate-200 dark:border-white/10 rounded-2xl p-4 bg-white/60 dark:bg-slate-900/40 backdrop-blur-md">
-                <div class="flex items-center justify-between gap-2">
-                    <button id="admin-toggle" class="flex-1 flex items-center justify-between px-3 py-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-100 rounded-xl text-sm font-medium transition-colors" onclick="toggleAdminPanel()">
-                        <span>Painel do Administrador</span>
-                        <span id="admin-toggle-icon">+</span>
-                    </button>
-                    <button id="admin-logout" class="ml-2 px-3 py-2 bg-emerald-900 hover:bg-emerald-800 text-slate-100 rounded-xl text-xs font-medium transition-colors border border-emerald-700 hidden">
-                        Sair
-                    </button>
-                </div>
-                <div id="admin-login" class="mt-4 space-y-3 hidden">
-                    <p class="text-xs text-slate-400">
-                        Faça login para acessar o painel de cadastro de tutoriais.
-                    </p>
-                    <div class="grid gap-3 md:grid-cols-3 items-end">
-                        <div>
-                            <label for="admin-user" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Usuário</label>
-                            <input id="admin-user" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: admin" />
-                        </div>
-                        <div>
-                            <label for="admin-password" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Senha</label>
-                            <input id="admin-password" type="password" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" />
-                        </div>
-                        <div>
-                            <button id="admin-login-btn" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
-                                Entrar
-                            </button>
-                        </div>
-                    </div>
-                    <p id="admin-login-status" class="text-xs text-red-400"></p>
-                </div>
-                <div id="admin-content" class="mt-4 space-y-4 hidden">
-                    <!-- Configuração do Token GitHub -->
-                    <div class="bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-4 mb-4">
-                        <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-2">⚙️ Configuração de Sincronização</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Para salvar automaticamente no GitHub, insira seu Token de Acesso Pessoal (Classic) abaixo uma única vez.</p>
-                        <div class="flex gap-2">
-                            <input id="github-token-input" type="password" class="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-3 py-1 text-sm text-slate-800 dark:text-white focus:outline-none focus:border-green-500" placeholder="Cole seu Token aqui (ghp_...)" />
-                            <button id="save-token-btn" type="button" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-medium transition-colors">Salvar Token</button>
-                        </div>
-                        <p id="token-status" class="text-xs mt-2 text-slate-500"></p>
-                    </div>
-
-                    <div class="bg-blue-900/20 border border-blue-700 rounded-lg p-3 mb-4">
-                        <p class="text-xs text-blue-300">
-                            <strong>� Sistema Simples:</strong> Tutoriais salvos localmente. 
-                            Para sincronizar, atualize o arquivo no GitHub manualmente.
-                        </p>
-                        <p class="text-xs text-yellow-300 mt-2">
-                            <strong>📝 Processo:</strong> Criar tutorial → Salvar → Copiar dados → Atualizar GitHub
-                        </p>
-                    </div>
-                    <p class="text-xs text-slate-400">
-                        Preencha os campos abaixo para cadastrar novos tutoriais. Link para GitHub aparecerá após salvar.
-                    </p>
-                    <form id="admin-form" class="grid gap-4 md:grid-cols-2">
-                        <div class="md:col-span-2">
-                            <label for="admin-title" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Título</label>
-                            <input id="admin-title" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required />
-                        </div>
-                        <div class="md:col-span-2">
-                            <div class="flex items-center justify-between mb-1">
-                                <label for="admin-excerpt" class="block text-xs font-medium text-slate-600 dark:text-slate-300">Resumo</label>
-                                <button type="button" id="admin-generate-excerpt" class="text-[11px] px-2 py-1 rounded bg-green-600 hover:bg-green-500 text-white font-medium">
-                                    Gerar resumo automático
-                                </button>
-                            </div>
-                            <textarea id="admin-excerpt" rows="2" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required></textarea>
-                        </div>
-                        <div>
-                            <label for="admin-type" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Tipo</label>
-                            <select id="admin-type" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                <option value="TUTORIAL">Tutorial</option>
-                                <option value="ARTICLE">Artigo</option>
-                                <option value="VIDEO">Vídeo</option>
-                                <option value="CUSTOM">Outro (personalizado)</option>
-                            </select>
-                            <input id="admin-type-custom" type="text" placeholder="Ex: CHECKLIST, PROCEDIMENTO" class="mt-2 w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500 hidden" />
-                        </div>
-                        <div>
-                            <label for="admin-tags" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Tags (separadas por vírgula)</label>
-                            <input id="admin-tags" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: vendas, estoque" />
-                        </div>
-                        <div class="md:col-span-2">
-                            <label for="admin-content-field" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Conteúdo (texto principal)</label>
-                            <textarea id="admin-content-field" rows="4" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Descreva aqui o passo a passo ou instruções em texto livre." required></textarea>
-                        </div>
-                        <div>
-                            <label for="admin-media-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Link de mídia (vídeo, imagem ou PDF)</label>
-                            <input id="admin-media-url" type="url" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ex: link de vídeo do Drive, imagem ou PDF (opcional)" />
-                        </div>
-                        <div>
-                            <label for="admin-attachment-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Link de anexo (opcional)</label>
-                            <input id="admin-attachment-url" type="url" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Documento adicional (texto, apresentação, etc.)" />
-                        </div>
-                        <div class="md:col-span-2">
-                            <input type="checkbox" id="admin-featured" class="w-4 h-4 text-green-600 bg-slate-100 border-slate-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-emerald-950 dark:border-emerald-800 align-middle">
-                            <label for="admin-featured" class="ml-2 text-sm font-medium text-slate-600 dark:text-slate-300 align-middle">Destacar este tutorial (aparece no topo da lista)</label>
-                        </div>
-                        <div class="md:col-span-2 flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3">
-                                <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
-                                    Salvar Tutorial
-                                </button>
-                                <button type="button" id="admin-cancel" class="px-4 py-2 bg-emerald-900 hover:bg-emerald-800 text-slate-100 rounded-lg text-sm font-medium transition-colors border border-emerald-700">
-                                    Cancelar
-                                </button>
-                            </div>
-                            <p id="admin-status" class="text-xs text-slate-400"></p>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
             <!-- Footer -->
             <footer class="mt-12 border-t border-slate-800/50 pt-6 pb-2">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
@@ -361,6 +252,114 @@
                 </div>
             </footer>
         </main>
+    </div>
+
+    <!-- Admin Modal -->
+    <div id="admin-modal-container" class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <section id="admin-section" class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-white/10 rounded-2xl p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+            <!-- Botão de Fechar Modal -->
+            <button id="admin-modal-close" class="absolute top-3 right-3 p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <svg class="w-6 h-6 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <div class="flex items-center justify-between gap-2 mb-6 border-b border-slate-200 dark:border-slate-700 pb-4">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white">Painel do Administrador</h2>
+                <button id="admin-logout" class="ml-2 px-3 py-2 bg-red-800 hover:bg-red-700 text-slate-100 rounded-xl text-xs font-medium transition-colors border border-red-700 hidden">
+                    Sair
+                </button>
+            </div>
+
+            <div id="admin-login" class="mt-4 space-y-3 hidden">
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Faça login para acessar o painel de cadastro de tutoriais.
+                </p>
+                <div class="grid gap-3 md:grid-cols-3 items-end">
+                    <div>
+                        <label for="admin-user" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Usuário</label>
+                        <input id="admin-user" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: admin" />
+                    </div>
+                    <div>
+                        <label for="admin-password" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Senha</label>
+                        <input id="admin-password" type="password" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    </div>
+                    <div>
+                        <button id="admin-login-btn" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
+                            Entrar
+                        </button>
+                    </div>
+                </div>
+                <p id="admin-login-status" class="text-xs text-red-400"></p>
+            </div>
+            <div id="admin-content" class="mt-4 space-y-4 hidden">
+                <!-- Configuração do Token GitHub -->
+                <div class="bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg p-4 mb-4">
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-2">⚙️ Configuração de Sincronização</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Para salvar automaticamente no GitHub, insira seu Token de Acesso Pessoal (Classic) abaixo uma única vez.</p>
+                    <div class="flex gap-2">
+                        <input id="github-token-input" type="password" class="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-3 py-1 text-sm text-slate-800 dark:text-white focus:outline-none focus:border-green-500" placeholder="Cole seu Token aqui (ghp_...)" />
+                        <button id="save-token-btn" type="button" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-medium transition-colors">Salvar Token</button>
+                    </div>
+                    <p id="token-status" class="text-xs mt-2 text-slate-500"></p>
+                </div>
+
+                <form id="admin-form" class="grid gap-4 md:grid-cols-2">
+                    <div class="md:col-span-2">
+                        <label for="admin-title" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Título</label>
+                        <input id="admin-title" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required />
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <label for="admin-excerpt" class="block text-xs font-medium text-slate-600 dark:text-slate-300">Resumo</label>
+                            <button type="button" id="admin-generate-excerpt" class="text-[11px] px-2 py-1 rounded bg-green-600 hover:bg-green-500 text-white font-medium">
+                                Gerar resumo automático
+                            </button>
+                        </div>
+                        <textarea id="admin-excerpt" rows="2" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" required></textarea>
+                    </div>
+                    <div>
+                        <label for="admin-type" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Tipo</label>
+                        <select id="admin-type" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            <option value="TUTORIAL">Tutorial</option>
+                            <option value="ARTICLE">Artigo</option>
+                            <option value="VIDEO">Vídeo</option>
+                            <option value="CUSTOM">Outro (personalizado)</option>
+                        </select>
+                        <input id="admin-type-custom" type="text" placeholder="Ex: CHECKLIST, PROCEDIMENTO" class="mt-2 w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500 hidden" />
+                    </div>
+                    <div>
+                        <label for="admin-tags" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Tags (separadas por vírgula)</label>
+                        <input id="admin-tags" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: vendas, estoque" />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="admin-content-field" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Conteúdo (texto principal)</label>
+                        <textarea id="admin-content-field" rows="4" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Descreva aqui o passo a passo ou instruções em texto livre." required></textarea>
+                    </div>
+                    <div>
+                        <label for="admin-media-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Link de mídia (vídeo, imagem ou PDF)</label>
+                        <input id="admin-media-url" type="url" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Ex: link de vídeo do Drive, imagem ou PDF (opcional)" />
+                    </div>
+                    <div>
+                        <label for="admin-attachment-url" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Link de anexo (opcional)</label>
+                        <input id="admin-attachment-url" type="url" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Documento adicional (texto, apresentação, etc.)" />
+                    </div>
+                    <div class="md:col-span-2">
+                        <input type="checkbox" id="admin-featured" class="w-4 h-4 text-green-600 bg-slate-100 border-slate-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-slate-800 focus:ring-2 dark:bg-emerald-950 dark:border-emerald-800 align-middle">
+                        <label for="admin-featured" class="ml-2 text-sm font-medium text-slate-600 dark:text-slate-300 align-middle">Destacar este tutorial (aparece no topo da lista)</label>
+                    </div>
+                    <div class="md:col-span-2 flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
+                                Salvar Tutorial
+                            </button>
+                            <button type="button" id="admin-cancel" class="px-4 py-2 bg-slate-200 dark:bg-emerald-900 hover:bg-slate-300 dark:hover:bg-emerald-800 text-slate-700 dark:text-slate-100 rounded-lg text-sm font-medium transition-colors border border-slate-300 dark:border-emerald-700">
+                                Cancelar
+                            </button>
+                        </div>
+                        <p id="admin-status" class="text-xs text-slate-400"></p>
+                    </div>
+                </form>
+            </div>
+        </section>
     </div>
 
     <script>
@@ -443,42 +442,6 @@
             } catch (e) {
                 console.error('Erro ao excluir tutorial:', e);
                 alert('Erro ao excluir tutorial. Tente novamente.');
-            }
-        }
-
-        // Função global para o botão admin (deve estar fora do escopo do script principal)
-        function toggleAdminPanel() {
-            const $adminContent = document.getElementById('admin-content');
-            const $adminLogin = document.getElementById('admin-login');
-            const $adminToggleIcon = document.getElementById('admin-toggle-icon');
-            
-            // Verificar estado de autenticação do localStorage
-            let adminAuth = false;
-            try {
-                adminAuth = localStorage.getItem('ln_admin_authed') === 'true';
-            } catch (e) {
-                adminAuth = false;
-            }
-
-            // Verificar estado atual dos painéis
-            const contentVisible = $adminContent && !$adminContent.classList.contains('hidden');
-            const loginVisible = $adminLogin && !$adminLogin.classList.contains('hidden');
-            
-            if (contentVisible || loginVisible) {
-                // Fechar painéis
-                if ($adminContent) $adminContent.classList.add('hidden');
-                if ($adminLogin) $adminLogin.classList.add('hidden');
-                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
-            } else {
-                // Abrir painel adequado
-                if (adminAuth && $adminContent) {
-                    $adminContent.classList.remove('hidden');
-                    if ($adminLogin) $adminLogin.classList.add('hidden');
-                } else if ($adminLogin) {
-                    $adminLogin.classList.remove('hidden');
-                    if ($adminContent) $adminContent.classList.add('hidden');
-                }
-                if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
             }
         }
 
@@ -705,8 +668,6 @@
         const $breadcrumbSection = document.getElementById('breadcrumb-section');
         const $breadcrumbSeparator2 = document.getElementById('breadcrumb-separator-2');
         const $breadcrumbCurrent = document.getElementById('breadcrumb-current');
-        const $adminToggle = document.getElementById('admin-toggle');
-        const $adminToggleIcon = document.getElementById('admin-toggle-icon');
         const $adminSection = document.getElementById('admin-section');
         const $adminLogout = document.getElementById('admin-logout');
         const $adminLogin = document.getElementById('admin-login');
@@ -730,6 +691,11 @@
         const $adminFeatured = document.getElementById('admin-featured');
         const $readingProgress = document.getElementById('reading-progress');
         const $readingBar = document.getElementById('reading-bar');
+        // Modal Admin
+        const $adminModalContainer = document.getElementById('admin-modal-container');
+        const $adminModalTrigger = document.getElementById('admin-modal-trigger');
+        const $adminModalClose = document.getElementById('admin-modal-close');
+
         
         // Elementos do Token
         const $githubTokenInput = document.getElementById('github-token-input');
@@ -770,15 +736,10 @@
             if (adminAutenticado) {
                 // Mostra o botão de sair e permite abrir o painel de cadastro
                 if ($adminLogout) $adminLogout.classList.remove('hidden');
-                if ($adminLogin) $adminLogin.classList.add('hidden');
-                if ($adminContent) $adminContent.classList.add('hidden');
-                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
+                // A visibilidade do conteúdo do modal é tratada ao abrir
             } else {
                 // Usuário comum: painel fechado, só login será mostrado quando clicar
                 if ($adminLogout) $adminLogout.classList.add('hidden');
-                if ($adminContent) $adminContent.classList.add('hidden');
-                if ($adminLogin) $adminLogin.classList.add('hidden');
-                if ($adminToggleIcon) $adminToggleIcon.textContent = '+';
             }
         }
 
@@ -1119,13 +1080,18 @@
                         <button id="admin-edit-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-xs font-medium text-emerald-100 border border-emerald-700">
                             Editar este tutorial
                         </button>` : ''}
+                        ${adminAuth ? `
+                        <button onclick="excluirTutorial('${tutorial.id}')" class="mt-4 ml-2 inline-flex items-center px-3 py-1.5 rounded-lg bg-red-900 hover:bg-red-800 text-xs font-medium text-red-100 border border-red-700">
+                            Excluir
+                        </button>` : ''}
                     </div>
                     <div class="prose prose-invert max-w-none">
                         ${gerarHtmlConteudo(tutorial)}
                     </div>
                 </div>
             `;
-
+            
+            // Adiciona o listener de exclusão aqui também, para o botão dentro do detalhe
             if (adminAuth) {
                 const $editBtn = document.getElementById('admin-edit-tutorial');
                 if ($editBtn) {
@@ -1133,13 +1099,8 @@
                         tutorialEmEdicaoId = tutorial.id;
                         preencherFormularioAdminComTutorial(tutorial);
                         // Abre painel e rola para ele
-                        if ($adminContent) $adminContent.classList.remove('hidden');
-                        if ($adminLogin) $adminLogin.classList.add('hidden');
-                        if ($adminToggleIcon) $adminToggleIcon.textContent = '−';
-                        const adminSectionEl = document.getElementById('admin-section');
-                        if (adminSectionEl) {
-                            adminSectionEl.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        voltarParaLista(); // Volta para a lista para não ter um modal sobre a view de detalhe
+                        openAdminModal();
                     });
                 }
             }
@@ -1181,6 +1142,32 @@
                 // A lógica de classe ativa já é tratada na renderização, mas aqui reforçamos se necessário
                 // Simplificado: a renderização já cuida disso
             });
+        }
+
+        // Funções do Modal Admin
+        function openAdminModal() {
+            if (!$adminModalContainer) return;
+            $adminModalContainer.classList.remove('hidden');
+
+            // Checa autenticação e mostra o painel correto
+            if (adminAutenticado) {
+                if ($adminContent) $adminContent.classList.remove('hidden');
+                if ($adminLogin) $adminLogin.classList.add('hidden');
+                if ($adminLogout) $adminLogout.classList.remove('hidden');
+            } else {
+                if ($adminContent) $adminContent.classList.add('hidden');
+                if ($adminLogin) $adminLogin.classList.remove('hidden');
+                if ($adminLogout) $adminLogout.classList.add('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            if (!$adminModalContainer) return;
+            $adminModalContainer.classList.add('hidden');
+            // Limpa o formulário ao fechar para não manter dados de edições anteriores
+            if ($adminForm) $adminForm.reset();
+            tutorialEmEdicaoId = null;
+            if ($adminStatus) $adminStatus.textContent = '';
         }
 
         // Event Listeners
@@ -1275,8 +1262,17 @@
             });
         }
 
-        // Área Administrativa / Painel do Administrador
-        // O evento é tratado pelo onclick direto no HTML + função global toggleAdminPanel()
+        // --- Event Listeners do Modal Admin ---
+        if ($adminModalTrigger) $adminModalTrigger.addEventListener('click', openAdminModal);
+        if ($adminModalClose) $adminModalClose.addEventListener('click', closeAdminModal);
+        if ($adminModalContainer) {
+            $adminModalContainer.addEventListener('click', (e) => {
+                // Fecha se clicar no backdrop (o container em si)
+                if (e.target === $adminModalContainer) {
+                    closeAdminModal();
+                }
+            });
+        }
 
         if ($adminLoginBtn) {
             $adminLoginBtn.addEventListener('click', (e) => {
@@ -1300,8 +1296,7 @@
                         $adminLoginStatus.classList.add('text-green-400');
                     }
 
-                    if ($adminLogin) $adminLogin.classList.add('hidden');
-                    if ($adminContent) $adminContent.classList.remove('hidden');
+                    openAdminModal(); // Reavalia o que mostrar dentro do modal já aberto
                     atualizarVisibilidadePainelAdmin();
                 } else {
                     if ($adminLoginStatus) {
@@ -1327,10 +1322,12 @@
                 }
                 if ($adminLoginUser) $adminLoginUser.value = '';
                 if ($adminLoginPassword) $adminLoginPassword.value = '';
-                if ($adminContent) $adminContent.classList.add('hidden');
-                if ($adminLogin) $adminLogin.classList.add('hidden');
+                
+                closeAdminModal();
                 atualizarVisibilidadePainelAdmin();
                 
+                // Recarrega a UI para remover botões de admin dos cards
+                atualizarUI();
                 // Se estiver vendo detalhes de um tutorial, remover o botão de edição
                 if ($tutorialDetail.style.display !== 'none') {
                     const $editBtn = document.getElementById('admin-edit-tutorial');
@@ -1395,6 +1392,7 @@
                     $adminStatus.classList.remove('text-red-400');
                     $adminStatus.classList.add('text-slate-400');
                 }
+                closeAdminModal();
             });
         }
 
@@ -1481,6 +1479,11 @@
                     $adminStatus.textContent = 'Tutorial salvo com sucesso!';
                     $adminStatus.classList.remove('text-red-400');
                     $adminStatus.classList.add('text-green-400');
+
+                    // Fecha o modal após um pequeno delay para o usuário ver a mensagem
+                    setTimeout(() => {
+                        closeAdminModal();
+                    }, 1500);
                 }
             });
         }
