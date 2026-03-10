@@ -89,6 +89,17 @@
             .prose * { color: black !important; }
             #tutorial-list, #course-area { display: none !important; }
         }
+        /* Estilos do Quiz */
+        .quiz-option:checked + label {
+            background-color: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .dark .quiz-option:checked + label {
+            background-color: #064e3b;
+            border-color: #10b981;
+            color: #d1fae5;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 selection:bg-green-500/30 flex flex-col relative overflow-x-hidden transition-colors duration-300">
@@ -379,6 +390,7 @@
                                 <th scope="col" class="px-6 py-3">Email</th>
                                 <th scope="col" class="px-6 py-3">Data Cadastro</th>
                                 <th scope="col" class="px-6 py-3">Status</th>
+                                <th scope="col" class="px-6 py-3">Progresso Geral</th>
                                 <th scope="col" class="px-6 py-3">Ações</th>
                             </tr>
                         </thead>
@@ -1238,6 +1250,7 @@
                             name: name,
                             email: email,
                             active: true,
+                            enrolledCourses: [], // Inicializa array de cursos inscritos
                             joinedAt: new Date().toISOString(),
                             progress: {}
                         });
@@ -1272,38 +1285,46 @@
 
             } else {
                 // Dashboard do Aluno Logado
-                let coursesHtml = CURSOS_DATA.map(course => {
+                
+                // Separar cursos inscritos de não inscritos
+                const enrolledIds = user.enrolledCourses || [];
+                const myCourses = CURSOS_DATA.filter(c => enrolledIds.includes(c.id));
+                const availableCourses = CURSOS_DATA.filter(c => !enrolledIds.includes(c.id));
+
+                const renderCourseCard = (course, isEnrolled) => {
                     // Calcular progresso
                     const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
                     const completedLessons = user.progress && user.progress[course.id] ? user.progress[course.id].length : 0;
                     const percent = totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 
                     return `
-                    <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
+                    <div class="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all flex flex-col h-full">
                         <div class="h-32 bg-slate-100 dark:bg-slate-800 flex items-center justify-center p-4">
                             <img src="${course.cover}" class="h-20 w-auto object-contain">
                         </div>
-                        <div class="p-5">
+                        <div class="p-5 flex-1 flex flex-col">
                             <h3 class="font-bold text-lg text-slate-800 dark:text-white mb-1">${course.title}</h3>
-                            <p class="text-sm text-slate-500 mb-4 line-clamp-2">${course.excerpt}</p>
+                            <p class="text-sm text-slate-500 mb-4 line-clamp-2 flex-1">${course.excerpt}</p>
                             
+                            ${isEnrolled ? `
                             <div class="mb-4">
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="text-slate-500">Progresso</span>
                                     <span class="font-bold text-emerald-600">${percent}%</span>
                                 </div>
                                 <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                                    <div class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: ${percent}%"></div> 
                                 </div>
                             </div>
+                            ` : ''}
 
-                            <button onclick="abrirPlayerCurso('${course.id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors">
-                                ${percent > 0 ? 'Continuar Curso' : 'Iniciar Curso'}
+                            <button onclick="${isEnrolled ? `abrirPlayerCurso('${course.id}')` : `inscreverCurso('${course.id}')`}" class="w-full py-2 ${isEnrolled ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-800 hover:bg-slate-700'} text-white text-sm font-medium rounded-lg transition-colors mt-auto">
+                                ${isEnrolled ? (percent > 0 ? 'Continuar Curso' : 'Iniciar Curso') : 'Inscrever-se'}
                             </button>
                         </div>
                     </div>
                     `;
-                }).join('');
+                };
 
                 $courseArea.innerHTML = `
                     <div class="flex justify-between items-center mb-6">
@@ -1314,12 +1335,46 @@
                         </div>
                         <button onclick="logoutCurso()" class="text-sm text-red-500 hover:text-red-400 border border-red-200 dark:border-red-900/30 px-3 py-1 rounded-lg">Sair</button>
                     </div>
+                    
+                    ${myCourses.length > 0 ? `
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Meus Cursos</h3>
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        ${coursesHtml}
+                        ${myCourses.map(c => renderCourseCard(c, true)).join('')}
                     </div>
+                    <div class="h-8"></div>
+                    ` : ''}
+
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">Cursos Disponíveis</h3>
+                    ${availableCourses.length > 0 ? `
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        ${availableCourses.map(c => renderCourseCard(c, false)).join('')}
+                    </div>
+                    ` : '<p class="text-slate-500">Você já está inscrito em todos os cursos disponíveis!</p>'}
                 `;
             }
         }
+
+        window.inscreverCurso = async function(courseId) {
+            if (!auth.currentUser) return;
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, {
+                    enrolledCourses: arrayUnion(courseId)
+                });
+                
+                // Atualiza localmente
+                if (currentUserData) {
+                    if (!currentUserData.enrolledCourses) currentUserData.enrolledCourses = [];
+                    currentUserData.enrolledCourses.push(courseId);
+                }
+                
+                alert("Inscrição realizada com sucesso!");
+                renderizarAreaCursos();
+            } catch (e) {
+                console.error("Erro ao inscrever:", e);
+                alert("Erro ao realizar inscrição.");
+            }
+        };
 
         // Função Global para Logout
         window.logoutCurso = function() {
@@ -1332,6 +1387,10 @@
             if (!course) return;
             const user = getCurrentUser();
 
+            // Carregar anotações do usuário (se houver)
+            // Estrutura no Firestore: users/{uid} -> campo notes (Map): { "courseId_lessonId": "texto" }
+            const userNotes = user.notes || {};
+
             // Renderizar Player
             let modulesHtml = course.modules.map((mod, modIdx) => {
                 const lessonsHtml = mod.lessons.map((lesson, lIdx) => {
@@ -1342,7 +1401,11 @@
                                 ${isCompleted ? '<svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
                             </div>
                             <span class="text-slate-700 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400">${lesson.title}</span>
-                            ${lesson.type === 'video' ? '<span class="ml-auto text-xs text-slate-400">🎥</span>' : '<span class="ml-auto text-xs text-slate-400">📄</span>'}
+                            ${lesson.type === 'video' ? '<span class="ml-auto text-xs text-slate-400">🎥</span>' : 
+                              lesson.type === 'quiz' ? '<span class="ml-auto text-xs text-slate-400">📝</span>' :
+                              lesson.type === 'image' ? '<span class="ml-auto text-xs text-slate-400">🖼️</span>' :
+                              '<span class="ml-auto text-xs text-slate-400">📄</span>'
+                            }
                         </button>
                     `;
                 }).join('');
@@ -1377,11 +1440,21 @@
                                 <p class="text-lg">Selecione uma aula ao lado para começar.</p>
                             </div>
                         </div>
+                        
+                        <!-- Área de Anotações -->
+                        <div id="notes-area" class="hidden p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Suas Anotações desta Aula</label>
+                            <textarea id="lesson-notes" rows="3" class="w-full p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Digite suas observações aqui..."></textarea>
+                            <div class="flex justify-end mt-2">
+                                <button id="btn-save-notes" class="text-xs px-3 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-slate-600 dark:text-slate-300 transition-colors">Salvar Anotação</button>
+                            </div>
+                        </div>
+
                         <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
                             <span id="current-lesson-title" class="font-medium text-slate-700 dark:text-slate-300"></span>
-                            <button id="btn-complete-lesson" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors">
-                                Marcar como Concluída
-                            </button>
+                            <div id="lesson-actions">
+                                <!-- Botões inseridos via JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1400,10 +1473,13 @@
 
             const contentArea = document.getElementById('lesson-content-area');
             const titleArea = document.getElementById('current-lesson-title');
-            const btnComplete = document.getElementById('btn-complete-lesson');
+            const actionsArea = document.getElementById('lesson-actions');
+            const notesArea = document.getElementById('notes-area');
+            const notesInput = document.getElementById('lesson-notes');
+            const btnSaveNotes = document.getElementById('btn-save-notes');
 
             titleArea.textContent = lesson.title;
-            
+
             if (lesson.type === 'video') {
                 let embedUrl = null;
                 const url = lesson.url || '';
@@ -1452,6 +1528,80 @@
                         <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
                     </div>
                 `;
+            } else if (lesson.type === 'quiz') {
+                // Renderizar Quiz
+                let questions = [];
+                try {
+                    questions = JSON.parse(lesson.content);
+                } catch(e) {
+                    questions = [];
+                }
+
+                const questionsHtml = questions.map((q, idx) => `
+                    <div class="mb-6 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <p class="font-bold text-slate-800 dark:text-white mb-3">${idx + 1}. ${q.title}</p>
+                        <div class="space-y-2">
+                            ${q.options.map((opt, optIdx) => `
+                                <div class="flex items-center">
+                                    <input type="radio" name="q_${idx}" id="q_${idx}_${optIdx}" value="${optIdx}" class="quiz-option hidden peer">
+                                    <label for="q_${idx}_${optIdx}" class="w-full cursor-pointer px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 peer-checked:bg-emerald-100 dark:peer-checked:bg-emerald-900/30 peer-checked:border-emerald-500 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 transition-all">
+                                        ${opt}
+                                    </label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <div class="w-full max-w-3xl">
+                        <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-lg text-sm">
+                            📝 <strong>Prova:</strong> Responda todas as questões abaixo e clique em "Enviar Respostas" para ver sua nota.
+                        </div>
+                        <form id="quiz-form">
+                            ${questionsHtml}
+                            <button type="submit" class="mt-4 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg">
+                                Enviar Respostas
+                            </button>
+                        </form>
+                        <div id="quiz-result" class="mt-6 hidden"></div>
+                    </div>
+                `;
+
+                // Lógica do Quiz
+                document.getElementById('quiz-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    let score = 0;
+                    let total = questions.length;
+                    
+                    questions.forEach((q, idx) => {
+                        const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
+                        if (selected && parseInt(selected.value) === q.correct) {
+                            score++;
+                        }
+                    });
+
+                    const percent = Math.round((score / total) * 100);
+                    const resultDiv = document.getElementById('quiz-result');
+                    resultDiv.classList.remove('hidden');
+                    
+                    let msgClass = percent >= 70 ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200';
+                    let msgTitle = percent >= 70 ? 'Parabéns! 🎉' : 'Tente Novamente 😕';
+                    
+                    resultDiv.innerHTML = `
+                        <div class="p-4 rounded-lg border ${msgClass} text-center">
+                            <h3 class="font-bold text-xl mb-1">${msgTitle}</h3>
+                            <p>Você acertou <strong>${score}</strong> de <strong>${total}</strong> questões (${percent}%).</p>
+                        </div>
+                    `;
+
+                    if (percent >= 70) {
+                        updateUserProgress(courseId, lessonId);
+                        // Atualiza botão de conclusão
+                        renderizarBotoesAcao(true);
+                    }
+                });
+
             } else { // Text
                 contentArea.innerHTML = `
                     <div class="w-full max-w-3xl prose prose-slate dark:prose-invert">
@@ -1460,12 +1610,49 @@
                 `;
             }
 
-            btnComplete.classList.remove('hidden');
-            btnComplete.onclick = () => {
-                updateUserProgress(courseId, lessonId);
-                // Re-renderizar para atualizar checks
-                abrirPlayerCurso(courseId);
-                // Tentar carregar próxima aula automaticamente (opcional)
+            // Configurar Anotações
+            notesArea.classList.remove('hidden');
+            const user = getCurrentUser();
+            const noteKey = `${courseId}_${lessonId}`;
+            notesInput.value = (user.notes && user.notes[noteKey]) ? user.notes[noteKey] : '';
+
+            btnSaveNotes.onclick = async () => {
+                const text = notesInput.value;
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                // Atualiza campo aninhado no mapa 'notes'
+                await updateDoc(userRef, {
+                    [`notes.${noteKey}`]: text
+                });
+                
+                // Atualiza local
+                if (!currentUserData.notes) currentUserData.notes = {};
+                currentUserData.notes[noteKey] = text;
+                
+                const originalText = btnSaveNotes.textContent;
+                btnSaveNotes.textContent = "Salvo! ✓";
+                setTimeout(() => btnSaveNotes.textContent = originalText, 2000);
+            };
+
+            // Botões de Ação (Concluir)
+            const isCompleted = user.progress && user.progress[courseId] && user.progress[courseId].includes(lessonId);
+            
+            function renderizarBotoesAcao(completed) {
+                actionsArea.innerHTML = `
+                    <button id="btn-complete-lesson" class="px-4 py-2 ${completed ? 'bg-slate-200 text-slate-600 cursor-default' : 'bg-emerald-600 hover:bg-emerald-500 text-white'} rounded-lg text-sm font-medium transition-colors">
+                        ${completed ? 'Aula Concluída ✓' : 'Marcar como Concluída'}
+                    </button>
+                `;
+                if (!completed) {
+                    document.getElementById('btn-complete-lesson').onclick = () => {
+                        updateUserProgress(courseId, lessonId);
+                        abrirPlayerCurso(courseId); // Recarrega sidebar
+                    };
+                }
+            }
+
+            // Se for Quiz, o botão só aparece se passar. Se for outro tipo, aparece sempre.
+            if (lesson.type !== 'quiz' || isCompleted) {
+                renderizarBotoesAcao(isCompleted);
             };
         };
 
@@ -1540,22 +1727,38 @@
                 
                 let lessonsHtml = '';
                 mod.lessons.forEach((lesson, lIdx) => {
-                    const placeholderText = lesson.type === 'video' ? 'URL do Vídeo (mp4/youtube)' : (lesson.type === 'image' ? 'URL da Imagem' : 'Conteúdo HTML/Texto');
-                    const inputValue = lesson.type === 'text' ? lesson.content : lesson.url;
+                    const placeholderText = lesson.type === 'video' ? 'URL do Vídeo (mp4/youtube)' : (lesson.type === 'image' ? 'URL da Imagem' : (lesson.type === 'quiz' ? 'JSON do Quiz (Use o importador)' : 'Conteúdo HTML/Texto'));
+                    const inputValue = lesson.type === 'text' || lesson.type === 'quiz' ? lesson.content : lesson.url;
+                    
+                    // Campo especial para Quiz
+                    let contentInputHtml = '';
+                    if (lesson.type === 'quiz') {
+                        contentInputHtml = `
+                            <div class="col-span-2 mt-2">
+                                <textarea placeholder="Cole aqui o texto da prova para gerar automaticamente..." class="w-full text-xs p-2 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white mb-1" rows="3" onchange="importarQuizTexto(${modIdx}, ${lIdx}, this.value)"></textarea>
+                                <p class="text-[10px] text-slate-500">Formato: Pergunta na linha 1, alternativas nas seguintes. Coloque * na correta. Pule uma linha entre questões.</p>
+                                <input type="hidden" value='${inputValue}' onchange="atualizarAula(${modIdx}, ${lIdx}, 'content', this.value)">
+                            </div>
+                        `;
+                    } else {
+                        contentInputHtml = `<input type="text" placeholder="${placeholderText}" value="${inputValue}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'content', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white col-span-2">`;
+                    }
 
                     lessonsHtml += `
                         <div class="flex gap-2 items-center mt-2 pl-4 border-l-2 border-slate-300 dark:border-slate-600">
                             <div class="flex-1 grid gap-2 sm:grid-cols-2">
-                                <input type="text" placeholder="Título da Aula" value="${lesson.title}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'title', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
-                                <input type="text" placeholder="${placeholderText}" value="${inputValue}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'content', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
+                                <input type="text" placeholder="Título da Aula" value="${lesson.title}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'title', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white col-span-2 sm:col-span-1">
+                                ${lesson.type !== 'quiz' ? contentInputHtml : ''}
                             </div>
                             <select onchange="atualizarAula(${modIdx}, ${lIdx}, 'type', this.value); renderizarModulosEditor();" class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
                                 <option value="video" ${lesson.type === 'video' ? 'selected' : ''}>Vídeo</option>
                                 <option value="image" ${lesson.type === 'image' ? 'selected' : ''}>Imagem</option>
+                                <option value="quiz" ${lesson.type === 'quiz' ? 'selected' : ''}>Prova / Quiz</option>
                                 <option value="text" ${lesson.type === 'text' ? 'selected' : ''}>Texto</option>
                             </select>
                             <button onclick="removerAula(${modIdx}, ${lIdx})" class="text-red-500 hover:text-red-700">×</button>
                         </div>
+                        ${lesson.type === 'quiz' ? contentInputHtml : ''}
                     `;
                 });
 
@@ -1603,6 +1806,37 @@
             } else {
                 cursoEmEdicao.modules[modIdx].lessons[lIdx][field] = val;
             }
+        };
+
+        // Função de Importação Inteligente de Quiz
+        window.importarQuizTexto = (modIdx, lIdx, text) => {
+            if (!text.trim()) return;
+            
+            const questions = [];
+            const blocks = text.split(/\n\s*\n/); // Separa por linhas vazias
+            
+            blocks.forEach(block => {
+                const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+                if (lines.length < 2) return;
+                
+                const qTitle = lines[0].replace(/^\d+[\.\)]\s*/, ''); // Remove "1. "
+                const options = [];
+                let correct = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    let opt = lines[i];
+                    const isCorrect = opt.startsWith('*');
+                    if (isCorrect) opt = opt.substring(1).trim();
+                    opt = opt.replace(/^[a-z][\.\)]\s*/i, ''); // Remove "a) "
+                    options.push(opt);
+                    if (isCorrect) correct = options.length - 1;
+                }
+                questions.push({ title: qTitle, options, correct });
+            });
+
+            // Salva como JSON no content
+            cursoEmEdicao.modules[modIdx].lessons[lIdx].content = JSON.stringify(questions);
+            alert(`${questions.length} questões importadas com sucesso!`);
         };
 
         // Event Listeners do Editor
@@ -1942,7 +2176,29 @@
             const users = getDbUsers();
             tbody.innerHTML = '';
 
-            users.forEach(u => {
+            // Calcular progresso geral para cada usuário
+            const usersWithProgress = users.map(u => {
+                let totalEnrolledLessons = 0;
+                let totalCompletedLessons = 0;
+                
+                if (u.enrolledCourses && u.enrolledCourses.length > 0) {
+                    u.enrolledCourses.forEach(courseId => {
+                        const course = CURSOS_DATA.find(c => c.id === courseId);
+                        if (course) {
+                            const lessonsCount = course.modules.reduce((acc, m) => acc + m.lessons.length, 0);
+                            totalEnrolledLessons += lessonsCount;
+                            
+                            const completed = u.progress && u.progress[courseId] ? u.progress[courseId].length : 0;
+                            totalCompletedLessons += completed;
+                        }
+                    });
+                }
+                
+                const generalProgress = totalEnrolledLessons > 0 ? Math.round((totalCompletedLessons / totalEnrolledLessons) * 100) : 0;
+                return { ...u, generalProgress };
+            });
+
+            usersWithProgress.forEach(u => {
                 const tr = document.createElement('tr');
                 tr.className = "bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600";
                 tr.innerHTML = `
@@ -1951,6 +2207,12 @@
                     <td class="px-6 py-4">${new Date(u.joinedAt).toLocaleDateString()}</td>
                     <td class="px-6 py-4">
                         <span class="${u.active ? 'text-green-600' : 'text-red-600'} font-bold">${u.active ? 'Ativo' : 'Inativo'}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="w-full bg-slate-200 rounded-full h-2.5 dark:bg-slate-700 max-w-[100px]">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${u.generalProgress}%"></div>
+                        </div>
+                        <span class="text-xs text-slate-500">${u.generalProgress}%</span>
                     </td>
                     <td class="px-6 py-4">
                         <button onclick="toggleUserStatus('${u.id}')" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
