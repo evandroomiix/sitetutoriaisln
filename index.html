@@ -391,7 +391,28 @@
         </section>
     </div>
 
-    <script>
+    <script type="module">
+        // Importando Firebase (Versão Modular)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        // Substitua os valores abaixo pelos que você copiou do console do Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_MESSAGING_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // Inicializando Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
         // Lógica do Modo Escuro/Claro
         const themeToggleBtn = document.getElementById('theme-toggle');
         const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
@@ -438,7 +459,7 @@
         }
 
         // Função global para excluir tutorial (apenas admins)
-        function excluirTutorial(tutorialId) {
+        window.excluirTutorial = function(tutorialId) {
             // Verificar autenticação em tempo real
             let adminAuth = false;
             try {
@@ -581,7 +602,7 @@
         let tutoriaisExtras = [];
 
         // Inicializar carregando os tutoriais do servidor
-        async function inicializarTutoriais() {
+        window.inicializarTutoriais = async function() {
             tutoriaisExtras = await carregarTutoriaisExtras();
             TUTORIAIS = construirListaTutoriais();
             atualizarUI();
@@ -844,7 +865,7 @@
         }
 
         // Função para renderizar botões de categoria
-        function renderizarCategorias() {
+        window.renderizarCategorias = function() {
             const categorias = obterCategorias();
             $categoryButtonsContainer.innerHTML = ''; // Limpa antes de renderizar
 
@@ -881,7 +902,7 @@
         }
 
         // Função para renderizar a lista de tutoriais
-        function renderizarLista(tutoriaisFiltrados) {
+        window.renderizarLista = function(tutoriaisFiltrados) {
             $tutorialsGrid.innerHTML = ''; // Limpa antes de renderizar
 
             // Se for modo CURSO, renderiza a tela de cursos
@@ -986,76 +1007,72 @@
 
         // --- LÓGICA DE CURSOS E USUÁRIOS ---
 
-        // Simulação de Banco de Dados de Usuários no LocalStorage
-        function getDbUsers() {
-            const users = localStorage.getItem('ln_users_db');
-            return users ? JSON.parse(users) : [];
-        }
+        // Variável global para armazenar o usuário atual do Firebase
+        let currentUserData = null;
 
-        function saveDbUsers(users) {
-            localStorage.setItem('ln_users_db', JSON.stringify(users));
-        }
-
-        function getCurrentUser() {
-            const user = sessionStorage.getItem('ln_current_user');
-            return user ? JSON.parse(user) : null;
-        }
-
-        function loginUser(email, password) {
-            const users = getDbUsers();
-            const user = users.find(u => u.email === email && u.password === password);
-            
+        // Monitorar estado da autenticação (Login/Logout)
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                if (!user.active) return { success: false, message: 'Usuário desativado pelo administrador.' };
-                sessionStorage.setItem('ln_current_user', JSON.stringify(user));
-                return { success: true };
-            }
-            return { success: false, message: 'Email ou senha incorretos.' };
-        }
-
-        function registerUser(name, email, password) {
-            const users = getDbUsers();
-            if (users.some(u => u.email === email)) {
-                return { success: false, message: 'Email já cadastrado.' };
-            }
-            const newUser = {
-                id: Date.now().toString(),
-                name,
-                email,
-                password, // Em produção, isso deveria ser hash!
-                active: true,
-                joinedAt: new Date().toISOString(),
-                progress: {} // { courseId: { lessonId: true } }
-            };
-            users.push(newUser);
-            saveDbUsers(users);
-            sessionStorage.setItem('ln_current_user', JSON.stringify(newUser));
-            return { success: true };
-        }
-
-        function updateUserProgress(courseId, lessonId) {
-            const currentUser = getCurrentUser();
-            if (!currentUser) return;
-
-            // Atualiza sessão
-            if (!currentUser.progress) currentUser.progress = {};
-            if (!currentUser.progress[courseId]) currentUser.progress[courseId] = [];
-            
-            if (!currentUser.progress[courseId].includes(lessonId)) {
-                currentUser.progress[courseId].push(lessonId);
-                sessionStorage.setItem('ln_current_user', JSON.stringify(currentUser));
-
-                // Atualiza "Banco"
-                const users = getDbUsers();
-                const dbUserIndex = users.findIndex(u => u.id === currentUser.id);
-                if (dbUserIndex >= 0) {
-                    users[dbUserIndex].progress = currentUser.progress;
-                    saveDbUsers(users);
+                // Usuário logou, buscar dados extras no Firestore (nome, progresso, status)
+                const docRef = doc(db, "users", user.uid);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.active === false) {
+                        alert("Sua conta foi desativada pelo administrador.");
+                        signOut(auth);
+                        return;
+                    }
+                    currentUserData = { uid: user.uid, email: user.email, ...data };
+                    // Se estiver na tela de cursos, atualiza
+                    if (estadoAtual.tipo === 'COURSE') {
+                        renderizarAreaCursos();
+                    }
+                } else {
+                    console.log("Usuário sem documento no banco!");
+                }
+            } else {
+                // Usuário deslogou
+                currentUserData = null;
+                if (estadoAtual.tipo === 'COURSE') {
+                    renderizarAreaCursos();
                 }
             }
+        });
+
+        // Função auxiliar para pegar usuário atual (compatibilidade com código antigo)
+        function getCurrentUser() {
+            return currentUserData;
         }
 
-        function renderizarAreaCursos() {
+        // Atualizar Progresso no Firebase
+        async function updateUserProgress(courseId, lessonId) {
+            if (!auth.currentUser) return;
+
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                
+                // Cria a chave dinâmica para atualização: "progress.curso_id"
+                // Usamos arrayUnion para adicionar sem duplicar
+                await updateDoc(userRef, {
+                    [`progress.${courseId}`]: arrayUnion(lessonId)
+                });
+
+                // Atualiza estado local para refletir na UI instantaneamente
+                if (currentUserData) {
+                    if (!currentUserData.progress) currentUserData.progress = {};
+                    if (!currentUserData.progress[courseId]) currentUserData.progress[courseId] = [];
+                    if (!currentUserData.progress[courseId].includes(lessonId)) {
+                        currentUserData.progress[courseId].push(lessonId);
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao salvar progresso:", e);
+            }
+        }
+
+        window.renderizarAreaCursos = function() {
             $tutorialList.classList.add('hidden');
             $tutorialDetail.style.display = 'none';
             $courseArea.classList.remove('hidden');
@@ -1064,7 +1081,7 @@
             $resultCount.textContent = 'Área Restrita';
             $noResults.classList.add('hidden');
 
-            const user = getCurrentUser();
+            const user = currentUserData; // Usa a variável global do Firebase
 
             if (!user) {
                 // Tela de Login/Registro
@@ -1099,19 +1116,20 @@
                 `;
 
                 // Eventos do Login
-                document.getElementById('course-login-form').addEventListener('submit', (e) => {
+                document.getElementById('course-login-form').addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const email = document.getElementById('c-email').value;
                     const pass = document.getElementById('c-pass').value;
-                    const res = loginUser(email, pass);
-                    if (res.success) {
-                        renderizarAreaCursos(); // Recarrega logado
-                    } else {
-                        alert(res.message);
+                    
+                    try {
+                        await signInWithEmailAndPassword(auth, email, pass);
+                        // O onAuthStateChanged vai cuidar de recarregar a tela
+                    } catch (error) {
+                        alert("Erro ao entrar: " + error.message);
                     }
                 });
 
-                document.getElementById('btn-show-register').addEventListener('click', () => {
+                document.getElementById('btn-show-register').addEventListener('click', async () => {
                     const name = prompt("Digite seu Nome Completo:");
                     if(!name) return;
                     const email = prompt("Digite seu Email:");
@@ -1119,17 +1137,36 @@
                     const pass = prompt("Crie uma Senha:");
                     if(!pass) return;
                     
-                    const res = registerUser(name, email, pass);
-                    if(res.success) {
+                    try {
+                        // 1. Cria usuário na Auth
+                        const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                        const user = userCredential.user;
+
+                        // 2. Cria documento no Firestore com dados extras
+                        await setDoc(doc(db, "users", user.uid), {
+                            name: name,
+                            email: email,
+                            active: true,
+                            joinedAt: new Date().toISOString(),
+                            progress: {}
+                        });
+
                         alert("Cadastro realizado! Bem-vindo.");
-                        renderizarAreaCursos();
-                    } else {
-                        alert(res.message);
+                        // O onAuthStateChanged vai cuidar do resto
+                    } catch (error) {
+                        alert("Erro ao cadastrar: " + error.message);
                     }
                 });
 
-                document.getElementById('btn-forgot-pass').addEventListener('click', () => {
-                    alert("Simulação: Um email de redefinição foi enviado para você.\n(Em um sistema real, isso usaria Firebase Auth).");
+                document.getElementById('btn-forgot-pass').addEventListener('click', async () => {
+                    const email = prompt("Digite seu email para recuperar a senha:");
+                    if (!email) return;
+                    try {
+                        await sendPasswordResetEmail(auth, email);
+                        alert("Email de recuperação enviado! Verifique sua caixa de entrada.");
+                    } catch (error) {
+                        alert("Erro: " + error.message);
+                    }
                 });
 
             } else {
@@ -1184,8 +1221,7 @@
 
         // Função Global para Logout
         window.logoutCurso = function() {
-            sessionStorage.removeItem('ln_current_user');
-            renderizarAreaCursos();
+            signOut(auth);
         };
 
         // Função Global para Abrir Player
@@ -1293,7 +1329,7 @@
         };
 
         // Função para renderizar o detalhe de um tutorial
-        let tutorialEmEdicaoId = null;
+        window.tutorialEmEdicaoId = null;
 
         function preencherFormularioAdminComTutorial(tutorial) {
             if (!$adminForm) return;
@@ -1500,7 +1536,7 @@
         }
 
         // Função para voltar à lista
-        function voltarParaLista() {
+        window.voltarParaLista = function() {
             $tutorialList.style.display = 'block';
             $tutorialDetail.style.display = 'none';
             $courseArea.classList.add('hidden'); // Esconde área de cursos
@@ -1522,7 +1558,7 @@
         }
 
         // Função para atualizar a UI com base no estado
-        function atualizarUI() {
+        window.atualizarUI = function() {
             renderizarCategorias();
             const tutoriaisFiltrados = filtrarTutoriais();
             
@@ -1551,7 +1587,7 @@
         }
 
         // Funções do Modal Admin
-        function openAdminModal() {
+        window.openAdminModal = function() {
             if (!$adminModalContainer) return;
             $adminModalContainer.classList.remove('hidden');
 
@@ -1569,7 +1605,7 @@
             }
         }
 
-        function closeAdminModal() {
+        window.closeAdminModal = function() {
             if (!$adminModalContainer) return;
             $adminModalContainer.classList.add('hidden');
             // Limpa o formulário ao fechar para não manter dados de edições anteriores
@@ -1604,13 +1640,15 @@
             });
         }
 
-        window.toggleUserStatus = function(userId) {
-            const users = getDbUsers();
-            const user = users.find(u => u.id === userId);
-            if (user) {
-                user.active = !user.active;
-                saveDbUsers(users);
-                renderizarTabelaUsuarios();
+        window.toggleUserStatus = async function(userId) {
+            try {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                const currentStatus = userSnap.data().active;
+                await updateDoc(userRef, { active: !currentStatus });
+                renderizarTabelaUsuarios(); // Recarrega a tabela
+            } catch (e) {
+                alert("Erro ao alterar status: " + e.message);
             }
         };
 
