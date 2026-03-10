@@ -2414,9 +2414,22 @@
         }
 
         // Renderizar Tabela de Usuários (Admin)
-        function renderizarTabelaUsuarios() {
+        async function renderizarTabelaUsuarios() {
             const tbody = document.getElementById('users-table-body');
-            const users = getDbUsers();
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Carregando...</td></tr>';
+
+            let users = [];
+            try {
+                const querySnapshot = await getDocs(collection(db, "users"));
+                querySnapshot.forEach((doc) => {
+                    users.push({ id: doc.id, ...doc.data() });
+                });
+            } catch (e) {
+                console.error("Erro ao buscar usuários:", e);
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-red-500">Erro ao carregar usuários.</td></tr>';
+                return;
+            }
+
             tbody.innerHTML = '';
 
             // Calcular progresso geral para cada usuário
