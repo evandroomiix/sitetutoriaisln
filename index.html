@@ -1485,9 +1485,9 @@
             }
 
             $courseArea.innerHTML = `
-                <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
+                <div class="flex flex-col lg:flex-row gap-6 lg:h-[calc(100vh-140px)]">
                     <!-- Sidebar de Módulos -->
-                    <div class="w-full lg:w-80 flex-shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-y-auto custom-scrollbar order-2 lg:order-1">
+                    <div class="w-full lg:w-80 flex-shrink-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-y-auto custom-scrollbar order-2 lg:order-1 h-80 lg:h-full">
                         <div class="p-4 border-b border-slate-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
                             <button onclick="renderizarAreaCursos()" class="text-xs text-emerald-600 hover:underline mb-2">← Voltar aos Cursos</button>
                             <h3 class="font-bold text-slate-800 dark:text-white">${course.title}</h3>
@@ -1496,9 +1496,9 @@
                     </div>
 
                     <!-- Área de Conteúdo -->
-                    <div class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex flex-col order-1 lg:order-2">
-                        <div id="lesson-content-area" class="flex-1 p-8 flex items-center justify-center bg-slate-50 dark:bg-black/20">
-                            <div class="text-center text-slate-500">
+                    <div class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex flex-col order-1 lg:order-2 min-h-[60vh] lg:min-h-0">
+                        <div id="lesson-content-area" class="flex-1 p-4 md:p-8 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-black/20">
+                            <div class="flex h-full items-center justify-center text-center text-slate-500">
                                 <p class="text-lg">Selecione uma aula ao lado para começar.</p>
                             </div>
                         </div>
@@ -1706,25 +1706,31 @@
                 if (embedUrl) {
                     // It's a YouTube video
                     contentArea.innerHTML = `
-                        <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
-                            <iframe class="w-full h-full" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        <div class="flex min-h-full items-center justify-center">
+                            <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
+                                <iframe class="w-full h-full" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            </div>
                         </div>
                     `;
                 } else {
                     // Assume it's a direct video file (.mp4, etc.)
                     contentArea.innerHTML = `
-                        <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
-                            <video controls class="w-full h-full">
-                                <source src="${url}" type="video/mp4">
-                                Seu navegador não suporta o formato deste vídeo ou o link está incorreto.
-                            </video>
+                        <div class="flex min-h-full items-center justify-center">
+                            <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
+                                <video controls class="w-full h-full">
+                                    <source src="${url}" type="video/mp4">
+                                    Seu navegador não suporta o formato deste vídeo ou o link está incorreto.
+                                </video>
+                            </div>
                         </div>
                     `;
                 }
             } else if (lesson.type === 'image') {
                 contentArea.innerHTML = `
-                    <div class="w-full max-w-4xl flex justify-center">
-                        <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
+                    <div class="flex min-h-full items-center justify-center">
+                        <div class="w-full max-w-4xl flex justify-center">
+                            <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
+                        </div>
                     </div>
                 `;
             } else if (lesson.type === 'quiz') {
@@ -1753,7 +1759,7 @@
                 `).join('');
 
                 contentArea.innerHTML = `
-                    <div class="w-full max-w-3xl">
+                    <div class="w-full max-w-3xl mx-auto">
                         <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 rounded-lg text-sm">
                             📝 <strong>Prova:</strong> Responda todas as questões abaixo e clique em "Enviar Respostas" para ver sua nota.
                         </div>
@@ -1801,7 +1807,7 @@
 
             } else { // Text
                 contentArea.innerHTML = `
-                    <div class="w-full max-w-3xl prose prose-slate dark:prose-invert">
+                    <div class="w-full max-w-3xl prose prose-slate dark:prose-invert mx-auto">
                         ${lesson.content}
                     </div>
                 `;
