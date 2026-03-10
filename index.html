@@ -616,8 +616,34 @@
         window.inicializarTutoriais = async function() {
             tutoriaisExtras = await carregarTutoriaisExtras();
             TUTORIAIS = construirListaTutoriais();
+            
+            // Restaurar estado da sessão (filtros, busca, aba atual)
+            try {
+                const estadoSalvo = sessionStorage.getItem('ln_estado_atual');
+                if (estadoSalvo) {
+                    const parsed = JSON.parse(estadoSalvo);
+                    estadoAtual = { ...estadoAtual, ...parsed };
+                    
+                    // Restaura valor da busca no input
+                    if ($searchInput && estadoAtual.busca) {
+                        $searchInput.value = estadoAtual.busca;
+                    }
+                }
+            } catch (e) {
+                console.error("Erro ao restaurar estado:", e);
+            }
+
             atualizarUI();
             carregarCursosDoFirestore(); // Carrega cursos ao iniciar
+
+            // Verificar se há um hash de tutorial na URL para abrir diretamente
+            if (window.location.hash.startsWith('#/tutorial/')) {
+                const id = window.location.hash.replace('#/tutorial/', '');
+                const tutorial = TUTORIAIS.find(t => t.id === id);
+                if (tutorial) {
+                    renderizarDetalhe(tutorial);
+                }
+            }
         }
 
         function normalizarTutorial(tutorial) {
@@ -1709,6 +1735,7 @@
         function renderizarDetalhe(tutorial) {
             $tutorialList.style.display = 'none';
             $tutorialDetail.style.display = 'block';
+            $courseArea.classList.add('hidden'); // Garante que a área de cursos esteja oculta
             if ($readingProgress) $readingProgress.classList.remove('hidden'); // Mostra barra de progresso
             $backButton.classList.remove('hidden'); // Mostra o botão voltar
             if ($breadcrumbCurrent && $breadcrumbSeparator2) {
@@ -1791,6 +1818,9 @@
 
         // Função para atualizar a UI com base no estado
         window.atualizarUI = function() {
+            // Salvar estado atual na sessão para persistência ao recarregar
+            sessionStorage.setItem('ln_estado_atual', JSON.stringify(estadoAtual));
+
             renderizarCategorias();
             const tutoriaisFiltrados = filtrarTutoriais();
             
