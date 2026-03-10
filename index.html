@@ -1510,66 +1510,120 @@
             notesArea.classList.add('hidden'); // Sem anotações na prova final
 
             const questions = course.finalExam;
-            
-            const questionsHtml = questions.map((q, idx) => `
-                <div class="mb-6 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                    <p class="font-bold text-lg text-slate-800 dark:text-white mb-4"><span class="text-emerald-600 mr-2">Questão ${idx + 1}</span> ${q.title}</p>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, optIdx) => `
-                            <div class="flex items-center">
-                                <input type="radio" name="final_q_${idx}" id="final_q_${idx}_${optIdx}" value="${optIdx}" class="quiz-option hidden peer">
-                                <label for="final_q_${idx}_${optIdx}" class="w-full cursor-pointer px-5 py-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 peer-checked:border-emerald-500 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 transition-all font-medium">
-                                    ${opt}
-                                </label>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
+            const userAnswers = new Array(questions.length).fill(null);
+            let currentIdx = 0;
 
-            contentArea.innerHTML = `
-                <div class="w-full max-w-4xl">
-                    <div class="mb-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl text-center">
-                        <h2 class="text-2xl font-bold text-emerald-800 dark:text-emerald-300 mb-2">🎓 Avaliação Final</h2>
-                        <p class="text-emerald-700 dark:text-emerald-400">Responda com atenção. Você precisa de 70% de acerto para receber o certificado.</p>
-                    </div>
-                    <form id="final-exam-form">
-                        ${questionsHtml}
-                        <button type="submit" class="mt-6 w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-emerald-600/20 transition-transform hover:scale-[1.01]">
-                            Finalizar Prova e Enviar
-                        </button>
-                    </form>
-                    <div id="final-exam-result" class="mt-8 hidden"></div>
-                </div>
-            `;
+            // Funções de controle da prova (expostas globalmente para o onclick funcionar)
+            window.examSelectOption = (optIdx) => {
+                userAnswers[currentIdx] = optIdx;
+                renderQuestion(); // Re-renderiza para mostrar seleção
+                
+                // Avanço automático se não for a última questão
+                if (currentIdx < questions.length - 1) {
+                    setTimeout(() => {
+                        // Verifica se o usuário ainda está na mesma questão antes de avançar
+                        if (userAnswers[currentIdx] === optIdx) {
+                            window.examNext();
+                        }
+                    }, 600);
+                }
+            };
 
-            document.getElementById('final-exam-form').addEventListener('submit', (e) => {
-                e.preventDefault();
+            window.examNext = () => {
+                if (currentIdx < questions.length - 1) {
+                    currentIdx++;
+                    renderQuestion();
+                }
+            };
+
+            window.examPrev = () => {
+                if (currentIdx > 0) {
+                    currentIdx--;
+                    renderQuestion();
+                }
+            };
+
+            window.examFinish = () => {
                 let score = 0;
                 questions.forEach((q, idx) => {
-                    const selected = document.querySelector(`input[name="final_q_${idx}"]:checked`);
-                    if (selected && parseInt(selected.value) === q.correct) score++;
+                    if (userAnswers[idx] === q.correct) score++;
                 });
 
                 const percent = Math.round((score / questions.length) * 100);
-                const resultDiv = document.getElementById('final-exam-result');
-                resultDiv.classList.remove('hidden');
-                
                 const passed = percent >= 70;
-                resultDiv.innerHTML = `
-                    <div class="p-8 rounded-2xl border-2 ${passed ? 'bg-green-50 border-green-500 text-green-900' : 'bg-red-50 border-red-500 text-red-900'} text-center">
-                        <div class="text-6xl mb-4">${passed ? '🏆' : '😕'}</div>
-                        <h3 class="font-bold text-3xl mb-2">${passed ? 'Aprovado!' : 'Não foi dessa vez'}</h3>
-                        <p class="text-xl mb-4">Você acertou <strong>${score}/${questions.length}</strong> (${percent}%).</p>
-                        ${passed ? '<p class="font-bold text-emerald-700">Parabéns! Você concluiu este curso com sucesso.</p>' : '<button onclick="carregarProvaFinal(\''+courseId+'\')" class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">Tentar Novamente</button>'}
+
+                contentArea.innerHTML = `
+                    <div class="w-full max-w-2xl mx-auto text-center animate-in fade-in">
+                        <div class="p-8 rounded-2xl border-2 ${passed ? 'bg-green-50 border-green-500 text-green-900 dark:bg-green-900/20 dark:text-green-100' : 'bg-red-50 border-red-500 text-red-900 dark:bg-red-900/20 dark:text-red-100'}">
+                            <div class="text-6xl mb-4">${passed ? '🏆' : '😕'}</div>
+                            <h3 class="font-bold text-3xl mb-2">${passed ? 'Aprovado!' : 'Não foi dessa vez'}</h3>
+                            <p class="text-xl mb-6">Você acertou <strong>${score}/${questions.length}</strong> (${percent}%).</p>
+                            
+                            ${passed 
+                                ? `<p class="font-bold text-emerald-700 dark:text-emerald-400 mb-6">Parabéns! Você concluiu este curso com sucesso.</p>
+                                   <button onclick="voltarParaLista()" class="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 shadow-lg">Voltar ao Início</button>`
+                                : `<button onclick="carregarProvaFinal('${courseId}')" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-500 shadow-lg">Tentar Novamente</button>`
+                            }
+                        </div>
                     </div>
                 `;
-                
+
                 if (passed) {
                     // Aqui poderia salvar o status de "Curso Concluído" no Firebase
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
-            });
+            };
+
+            function renderQuestion() {
+                const q = questions[currentIdx];
+                const progressPercent = Math.round(((currentIdx + 1) / questions.length) * 100);
+                
+                contentArea.innerHTML = `
+                    <div class="w-full max-w-3xl mx-auto">
+                        <!-- Barra de Progresso -->
+                        <div class="mb-6">
+                            <div class="flex justify-between text-xs text-slate-500 mb-1">
+                                <span>Questão ${currentIdx + 1} de ${questions.length}</span>
+                                <span>${progressPercent}%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cartão da Questão -->
+                        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg p-6 md:p-8 animate-in fade-in">
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-6">${q.title}</h3>
+                            
+                            <div class="space-y-3">
+                                ${q.options.map((opt, optIdx) => `
+                                    <label class="flex items-center p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-all ${userAnswers[currentIdx] === optIdx ? 'ring-2 ring-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500' : ''}">
+                                        <input type="radio" name="q_option" value="${optIdx}" class="hidden" ${userAnswers[currentIdx] === optIdx ? 'checked' : ''} onclick="examSelectOption(${optIdx})">
+                                        <div class="w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center ${userAnswers[currentIdx] === optIdx ? 'border-emerald-500 bg-emerald-500' : 'border-slate-400'}">
+                                            ${userAnswers[currentIdx] === optIdx ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''}
+                                        </div>
+                                        <span class="text-slate-700 dark:text-slate-200">${opt}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Botões de Navegação -->
+                        <div class="flex justify-between mt-8">
+                            <button onclick="examPrev()" class="px-6 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${currentIdx === 0 ? 'invisible' : ''}">
+                                ← Anterior
+                            </button>
+                            
+                            ${currentIdx === questions.length - 1 
+                                ? `<button onclick="examFinish()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg shadow-emerald-600/20 transition-transform hover:scale-105">Finalizar Prova</button>`
+                                : `<button onclick="examNext()" class="px-6 py-2 bg-slate-800 dark:bg-white dark:text-slate-900 text-white rounded-lg hover:opacity-90 transition-colors">Próxima →</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }
+
+            renderQuestion();
         };
 
         window.carregarAula = function(courseId, lessonId) {
@@ -1973,16 +2027,20 @@
         // Função auxiliar para processar texto de quiz (usada no editor de aula e prova final)
         function processarTextoQuiz(text) {
              if (!text.trim()) return [];
+            
             const questions = [];
             const lines = text.split('\n').map(l => l.trim()).filter(l => l);
             
             let currentQuestion = null;
 
             for (const line of lines) {
-                if (/^\d+[\.\)]/.test(line)) { // Inicia uma nova questão
+                // Detecta início de questão: "1. Texto", "1) Texto", "1 - Texto"
+                const questionMatch = line.match(/^(\d+)[\.\)\-]\s*(.+)/);
+                
+                if (questionMatch) { 
                     if (currentQuestion) questions.push(currentQuestion);
                     currentQuestion = {
-                        title: line.replace(/^\d+[\.\)]\s*/, ''),
+                        title: questionMatch[2],
                         options: [],
                         correct: -1
                     };
@@ -1990,7 +2048,9 @@
                     let optionText = line;
                     const isCorrect = optionText.startsWith('*');
                     if (isCorrect) optionText = optionText.substring(1).trim();
-                    optionText = optionText.replace(/^[a-zA-Z][\.\)]\s*/, '');
+                    
+                    // Remove marcadores de alternativa como "a)", "A.", "a -"
+                    optionText = optionText.replace(/^[a-zA-Z][\.\)\-]\s*/, '');
                     
                     currentQuestion.options.push(optionText);
                     if (isCorrect) {
