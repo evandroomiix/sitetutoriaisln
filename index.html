@@ -1303,10 +1303,12 @@
                 const enrolledIds = user.enrolledCourses || [];
                 const myCourses = CURSOS_DATA.filter(c => enrolledIds.includes(c.id));
                 const availableCourses = CURSOS_DATA.filter(c => !enrolledIds.includes(c.id));
-
                 const renderCourseCard = (course, isEnrolled) => {
                     // Calcular progresso
-                    const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
+                    let totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
+                    if (course.finalExam && course.finalExam.length > 0) {
+                        totalLessons += 1; // Adiciona a prova final na contagem total
+                    }
                     const completedLessons = user.progress && user.progress[course.id] ? user.progress[course.id].length : 0;
                     const percent = totalLessons === 0 ? 0 : Math.round((completedLessons / totalLessons) * 100);
 
@@ -1331,9 +1333,17 @@
                             </div>
                             ` : ''}
 
-                            <button onclick="${isEnrolled ? `abrirPlayerCurso('${course.id}')` : `inscreverCurso('${course.id}')`}" class="w-full py-2 ${isEnrolled ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-800 hover:bg-slate-700'} text-white text-sm font-medium rounded-lg transition-colors mt-auto">
-                                ${isEnrolled ? (percent > 0 ? 'Continuar Curso' : 'Iniciar Curso') : 'Inscrever-se'}
-                            </button>
+                            ${isEnrolled ? `
+                                ${percent === 100 ? `
+                                <button disabled class="w-full py-2 bg-green-700 text-white text-sm font-medium rounded-lg cursor-default">
+                                    ✓ Concluído
+                                </button>
+                                ` : `
+                                <button onclick="abrirPlayerCurso('${course.id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors mt-auto">
+                                    ${percent > 0 ? 'Continuar Curso' : 'Iniciar Curso'}
+                                </button>
+                                `}` : `
+                            <button onclick="inscreverCurso('${course.id}')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors mt-auto">Inscrever-se</button>`}
                         </div>
                     </div>
                     `;
@@ -1516,34 +1526,20 @@
             // Funções de controle da prova (expostas globalmente para o onclick funcionar)
             window.examSelectOption = (optIdx) => {
                 userAnswers[currentIdx] = optIdx;
-                renderQuestion(); // Re-renderiza para mostrar seleção
-                
-                // Avanço automático se não for a última questão
-                if (currentIdx < questions.length - 1) {
-                    setTimeout(() => {
-                        // Verifica se o usuário ainda está na mesma questão antes de avançar
-                        if (userAnswers[currentIdx] === optIdx) {
-                            window.examNext();
-                        }
-                    }, 600);
-                }
+                renderQuestion(); // Apenas re-renderiza para mostrar a seleção, sem avançar.
             };
 
             window.examNext = () => {
+                if (userAnswers[currentIdx] === null) {
+                    alert('Por favor, selecione uma resposta para continuar.');
+                    return;
+                }
                 if (currentIdx < questions.length - 1) {
                     currentIdx++;
                     renderQuestion();
                 }
             };
-
-            window.examPrev = () => {
-                if (currentIdx > 0) {
-                    currentIdx--;
-                    renderQuestion();
-                }
-            };
-
-            window.examFinish = () => {
+            window.examFinish = async () => {
                 let score = 0;
                 questions.forEach((q, idx) => {
                     if (userAnswers[idx] === q.correct) score++;
@@ -1561,7 +1557,7 @@
                             
                             ${passed 
                                 ? `<p class="font-bold text-emerald-700 dark:text-emerald-400 mb-6">Parabéns! Você concluiu este curso com sucesso.</p>
-                                   <button onclick="voltarParaLista()" class="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 shadow-lg">Voltar ao Início</button>`
+                                   <button onclick="renderizarAreaCursos()" class="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 shadow-lg">Voltar aos Cursos</button>`
                                 : `<button onclick="carregarProvaFinal('${courseId}')" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-500 shadow-lg">Tentar Novamente</button>`
                             }
                         </div>
@@ -1569,7 +1565,7 @@
                 `;
 
                 if (passed) {
-                    // Aqui poderia salvar o status de "Curso Concluído" no Firebase
+                    await updateUserProgress(courseId, 'final_exam');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             };
@@ -1609,11 +1605,7 @@
                         </div>
 
                         <!-- Botões de Navegação -->
-                        <div class="flex justify-between mt-8">
-                            <button onclick="examPrev()" class="px-6 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${currentIdx === 0 ? 'invisible' : ''}">
-                                ← Anterior
-                            </button>
-                            
+                        <div class="flex justify-end mt-8">
                             ${currentIdx === questions.length - 1 
                                 ? `<button onclick="examFinish()" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg shadow-emerald-600/20 transition-transform hover:scale-105">Finalizar Prova</button>`
                                 : `<button onclick="examNext()" class="px-6 py-2 bg-slate-800 dark:bg-white dark:text-slate-900 text-white rounded-lg hover:opacity-90 transition-colors">Próxima →</button>`
