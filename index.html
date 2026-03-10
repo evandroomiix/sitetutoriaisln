@@ -390,6 +390,7 @@
                                 <th scope="col" class="px-6 py-3">Email</th>
                                 <th scope="col" class="px-6 py-3">Data Cadastro</th>
                                 <th scope="col" class="px-6 py-3">Status</th>
+                                <th scope="col" class="px-6 py-3">Nível (Role)</th>
                                 <th scope="col" class="px-6 py-3">Progresso Geral</th>
                                 <th scope="col" class="px-6 py-3">Ações</th>
                             </tr>
@@ -486,6 +487,7 @@
 
         // --- LISTA DE TUTORES / ADMINISTRADORES ---
         // Coloque aqui o seu email de login para que o sistema saiba que você é o Tutor
+        // ESTA LISTA GARANTE O ACESSO DE SUPER-ADMINISTRADOR (SEGURANÇA DO CÓDIGO)
         const ADMIN_EMAILS = ["seu-email@exemplo.com", "admin@lojasnordestina.com.br"];
 
         // Inicializando Firebase
@@ -910,6 +912,7 @@
 
         // Controle simples de autenticação do painel
         let adminAutenticado = false;
+        let userRole = 'student'; // 'student', 'tutor', 'admin'
         try {
             adminAutenticado = localStorage.getItem('ln_admin_authed') === 'true';
         } catch (e) {
@@ -919,10 +922,17 @@
         function atualizarVisibilidadePainelAdmin() {
             if (!$adminSection) return;
 
-            if (adminAutenticado) {
+            // Verifica se tem permissão mínima (Tutor ou Admin)
+            if (userRole === 'admin' || userRole === 'tutor') {
                 // Mostra o botão de sair e permite abrir o painel de cadastro
                 if ($adminLogout) $adminLogout.classList.remove('hidden');
                 if ($adminTabs) $adminTabs.classList.remove('hidden');
+                
+                // Controla visibilidade da aba de Usuários (Apenas Admin)
+                const tabUsers = document.querySelector('[data-tab="users"]');
+                if (tabUsers) {
+                    tabUsers.style.display = (userRole === 'admin') ? 'inline-block' : 'none';
+                }
                 // A visibilidade do conteúdo do modal é tratada ao abrir
             } else {
                 // Usuário comum: painel fechado, só login será mostrado quando clicar
@@ -1039,7 +1049,7 @@
                                 } border border-slate-700">
                                     ${tutorial.type}
                                 </span>
-                                ${isCustomTutorial && adminAutenticado ? `
+                            ${isCustomTutorial && (userRole === 'admin' || userRole === 'tutor') ? `
                                 <button onclick="excluirTutorial('${tutorial.id}')" class="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium transition-colors">
                                     🗑 Excluir
                                 </button>` : ''}
@@ -1113,11 +1123,17 @@
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     
-                    // Verifica se é Tutor/Admin pelo email
+                    // 1. Define o Role (Nível)
+                    // Se estiver na lista hardcoded, força ser ADMIN (Segurança Máxima)
                     if (ADMIN_EMAILS.includes(user.email)) {
-                        adminAutenticado = true;
-                        localStorage.setItem('ln_admin_authed', 'true');
-                        atualizarVisibilidadePainelAdmin();
+                        userRole = 'admin';
+                    } else {
+                        // Caso contrário, pega do banco ou assume aluno
+                        userRole = data.role || 'student';
+                    }
+
+                    if (userRole === 'admin' || userRole === 'tutor') {
+                         atualizarVisibilidadePainelAdmin();
                     }
 
                     if (data.active === false) {
@@ -1137,8 +1153,8 @@
                 // Usuário deslogou
                 currentUserData = null;
                 if (estadoAtual.tipo === 'COURSE') {
-                    // Se o admin deslogar, remove acesso
-                    if (adminAutenticado) {
+                    // Se deslogar, remove acesso
+                    if (userRole !== 'student') {
                         adminAutenticado = false;
                         localStorage.removeItem('ln_admin_authed');
                         atualizarVisibilidadePainelAdmin();
@@ -1261,6 +1277,7 @@
                         await setDoc(doc(db, "users", user.uid), {
                             name: name,
                             email: email,
+                            role: 'student', // Todo novo cadastro começa como Aluno
                             active: true,
                             enrolledCourses: [], // Inicializa array de cursos inscritos
                             joinedAt: new Date().toISOString(),
@@ -1292,7 +1309,7 @@
                     if (title.textContent.includes('Aluno')) {
                         title.textContent = 'Acesso do Tutor';
                         title.classList.add('text-emerald-600');
-                        alert("Dica: Use seu email cadastrado na lista de administradores do código para liberar o painel completo.");
+                        alert("Dica: Apenas emails autorizados ou promovidos a Tutor/Admin terão acesso ao painel.");
                     }
                 });
 
@@ -1354,7 +1371,7 @@
                         <div class="flex items-center gap-3">
                             <h2 class="text-xl font-bold text-slate-800 dark:text-white">Olá, ${user.name} 👋</h2>
                             <p class="text-sm text-slate-500">Continue seus estudos.</p>
-                            ${adminAutenticado ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded border border-emerald-200">TUTOR</span>' : ''}
+                                ${userRole === 'admin' ? '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-bold rounded border border-red-200">ADMIN</span>' : (userRole === 'tutor' ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded border border-emerald-200">TUTOR</span>' : '<span class="px-2 py-1 bg-slate-100 text-slate-800 text-xs font-bold rounded border border-slate-200">ALUNO</span>')}
                         </div>
                         <button onclick="logoutCurso()" class="text-sm text-red-500 hover:text-red-400 border border-red-200 dark:border-red-900/30 px-3 py-1 rounded-lg">Sair</button>
                     </div>
@@ -2275,12 +2292,7 @@
             }
 
             // Verificar autenticação em tempo real
-            let adminAuth = false;
-            try {
-                adminAuth = localStorage.getItem('ln_admin_authed') === 'true';
-            } catch (e) {
-                adminAuth = false;
-            }
+            const canEdit = userRole === 'admin' || userRole === 'tutor';
 
             $tutorialDetail.innerHTML = `
                 <div class="animate-in fade-in duration-500">
@@ -2297,11 +2309,11 @@
                         <button onclick="window.print()" id="btn-print-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 transition-colors">
                             🖨️ Imprimir
                         </button>
-                        ${adminAuth ? `
+                        ${canEdit ? `
                         <button id="admin-edit-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-xs font-medium text-emerald-100 border border-emerald-700">
                             Editar este tutorial
                         </button>` : ''}
-                        ${adminAuth ? `
+                        ${canEdit ? `
                         <button onclick="excluirTutorial('${tutorial.id}')" class="mt-4 ml-2 inline-flex items-center px-3 py-1.5 rounded-lg bg-red-900 hover:bg-red-800 text-xs font-medium text-red-100 border border-red-700">
                             Excluir
                         </button>` : ''}
@@ -2313,7 +2325,7 @@
             `;
             
             // Adiciona o listener de exclusão aqui também, para o botão dentro do detalhe
-            if (adminAuth) {
+            if (canEdit) {
                 const $editBtn = document.getElementById('admin-edit-tutorial');
                 if ($editBtn) {
                     $editBtn.addEventListener('click', () => {
@@ -2387,7 +2399,7 @@
             $adminModalContainer.classList.remove('hidden');
 
             // Checa autenticação e mostra o painel correto
-            if (adminAutenticado) {
+            if (userRole === 'admin' || userRole === 'tutor') {
                 if ($adminContentPanel) $adminContentPanel.classList.remove('hidden'); // Mostra painel de conteúdo
                 if ($adminLogin) $adminLogin.classList.add('hidden');
                 if ($adminLogout) $adminLogout.classList.remove('hidden');
@@ -2415,6 +2427,8 @@
 
         // Renderizar Tabela de Usuários (Admin)
         async function renderizarTabelaUsuarios() {
+            if (userRole !== 'admin') return; // Segurança extra
+
             const tbody = document.getElementById('users-table-body');
             tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Carregando...</td></tr>';
 
@@ -2455,6 +2469,10 @@
             });
 
             usersWithProgress.forEach(u => {
+                const uRole = u.role || 'student';
+                // Verifica se é um super admin hardcoded (não permite editar role destes)
+                const isHardcodedAdmin = ADMIN_EMAILS.includes(u.email);
+
                 const tr = document.createElement('tr');
                 tr.className = "bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600";
                 tr.innerHTML = `
@@ -2463,6 +2481,16 @@
                     <td class="px-6 py-4">${new Date(u.joinedAt).toLocaleDateString()}</td>
                     <td class="px-6 py-4">
                         <span class="${u.active ? 'text-green-600' : 'text-red-600'} font-bold">${u.active ? 'Ativo' : 'Inativo'}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        ${isHardcodedAdmin ? 
+                            '<span class="text-xs font-bold text-red-500 border border-red-500 px-2 py-1 rounded">SUPER ADMIN</span>' : 
+                            `<select onchange="mudarRoleUsuario('${u.id}', this.value)" class="bg-slate-50 border border-slate-300 text-slate-900 text-xs rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-1 dark:bg-slate-700 dark:border-slate-600 dark:placeholder-slate-400 dark:text-white">
+                                <option value="student" ${uRole === 'student' ? 'selected' : ''}>Aluno</option>
+                                <option value="tutor" ${uRole === 'tutor' ? 'selected' : ''}>Tutor</option>
+                                <option value="admin" ${uRole === 'admin' ? 'selected' : ''}>Admin</option>
+                            </select>`
+                        }
                     </td>
                     <td class="px-6 py-4">
                         <div class="w-full bg-slate-200 rounded-full h-2.5 dark:bg-slate-700 max-w-[100px]">
@@ -2489,6 +2517,19 @@
                 renderizarTabelaUsuarios(); // Recarrega a tabela
             } catch (e) {
                 alert("Erro ao alterar status: " + e.message);
+            }
+        };
+
+        window.mudarRoleUsuario = async function(userId, newRole) {
+            if (userRole !== 'admin') return;
+            try {
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, { role: newRole });
+                // Não precisa recarregar tudo, o select já mudou visualmente
+                console.log(`Usuário ${userId} alterado para ${newRole}`);
+            } catch (e) {
+                alert("Erro ao alterar nível: " + e.message);
+                renderizarTabelaUsuarios(); // Reverte visualmente em caso de erro
             }
         };
 
@@ -2605,6 +2646,7 @@
         if ($adminLogout) {
             $adminLogout.addEventListener('click', () => {
                 adminAutenticado = false;
+                userRole = 'student'; // Reseta role
                 try {
                     localStorage.removeItem('ln_admin_authed');
                 } catch (err) {}
@@ -2645,6 +2687,10 @@
                         $adminUsersPanel.classList.add('hidden');
                         $adminCoursesPanel.classList.add('hidden');
                     } else if (tab === 'users') {
+                        if (userRole !== 'admin') {
+                            alert("Acesso negado. Apenas administradores podem gerenciar usuários.");
+                            return;
+                        }
                         $adminContentPanel.classList.add('hidden');
                         $adminUsersPanel.classList.remove('hidden');
                         $adminCoursesPanel.classList.add('hidden');
