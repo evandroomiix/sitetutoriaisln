@@ -1405,23 +1405,54 @@
             titleArea.textContent = lesson.title;
             
             if (lesson.type === 'video') {
-                contentArea.innerHTML = `
-                    <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
-                        <video controls class="w-full h-full">
-                            <source src="${lesson.url}" type="video/mp4">
-                            Seu navegador não suporta vídeo.
-                        </video>
-                    </div>
-                `;
-            } else {
-                if (lesson.type === 'image') {
+                let embedUrl = null;
+                const url = lesson.url || '';
+
+                // Check for YouTube
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    let videoId = null;
+                    const patterns = [
+                        /watch\?v=([a-zA-Z0-9_-]{11})/,
+                        /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+                        /embed\/([a-zA-Z0-9_-]{11})/
+                    ];
+                    for (const pattern of patterns) {
+                        const match = url.match(pattern);
+                        if (match && match[1]) {
+                            videoId = match[1];
+                            break;
+                        }
+                    }
+                    if (videoId) {
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    }
+                }
+
+                if (embedUrl) {
+                    // It's a YouTube video
                     contentArea.innerHTML = `
-                        <div class="w-full max-w-4xl flex justify-center">
-                            <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
+                        <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
+                            <iframe class="w-full h-full" src="${embedUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         </div>
                     `;
-                    return;
+                } else {
+                    // Assume it's a direct video file (.mp4, etc.)
+                    contentArea.innerHTML = `
+                        <div class="w-full max-w-3xl aspect-video bg-black rounded-lg overflow-hidden shadow-xl">
+                            <video controls class="w-full h-full">
+                                <source src="${url}" type="video/mp4">
+                                Seu navegador não suporta o formato deste vídeo ou o link está incorreto.
+                            </video>
+                        </div>
+                    `;
                 }
+            } else if (lesson.type === 'image') {
+                contentArea.innerHTML = `
+                    <div class="w-full max-w-4xl flex justify-center">
+                        <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
+                    </div>
+                `;
+            } else { // Text
                 contentArea.innerHTML = `
                     <div class="w-full max-w-3xl prose prose-slate dark:prose-invert">
                         ${lesson.content}
