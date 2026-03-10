@@ -79,6 +79,16 @@
         .animation-delay-4000 {
             animation-delay: 4s;
         }
+        /* Estilos de Impressão */
+        @media print {
+            body { background-color: white !important; color: black !important; }
+            header, #sidebar, #reading-progress, .back-button, #admin-edit-tutorial, #btn-print-tutorial, footer, #sidebar-toggle, #theme-toggle, #admin-modal-trigger { display: none !important; }
+            main { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+            #tutorial-detail { display: block !important; }
+            .prose { max-width: 100% !important; color: black !important; }
+            .prose * { color: black !important; }
+            #tutorial-list, #course-area { display: none !important; }
+        }
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-50 selection:bg-green-500/30 flex flex-col relative overflow-x-hidden transition-colors duration-300">
@@ -1404,6 +1414,14 @@
                     </div>
                 `;
             } else {
+                if (lesson.type === 'image') {
+                    contentArea.innerHTML = `
+                        <div class="w-full max-w-4xl flex justify-center">
+                            <img src="${lesson.url}" class="max-w-full h-auto max-h-[80vh] rounded-lg shadow-xl border border-slate-200 dark:border-slate-700" alt="${lesson.title}">
+                        </div>
+                    `;
+                    return;
+                }
                 contentArea.innerHTML = `
                     <div class="w-full max-w-3xl prose prose-slate dark:prose-invert">
                         ${lesson.content}
@@ -1491,14 +1509,18 @@
                 
                 let lessonsHtml = '';
                 mod.lessons.forEach((lesson, lIdx) => {
+                    const placeholderText = lesson.type === 'video' ? 'URL do Vídeo (mp4/youtube)' : (lesson.type === 'image' ? 'URL da Imagem' : 'Conteúdo HTML/Texto');
+                    const inputValue = lesson.type === 'text' ? lesson.content : lesson.url;
+
                     lessonsHtml += `
                         <div class="flex gap-2 items-center mt-2 pl-4 border-l-2 border-slate-300 dark:border-slate-600">
                             <div class="flex-1 grid gap-2 sm:grid-cols-2">
                                 <input type="text" placeholder="Título da Aula" value="${lesson.title}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'title', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
-                                <input type="text" placeholder="URL do Vídeo ou Conteúdo HTML" value="${lesson.type === 'video' ? lesson.url : lesson.content}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'content', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
+                                <input type="text" placeholder="${placeholderText}" value="${inputValue}" onchange="atualizarAula(${modIdx}, ${lIdx}, 'content', this.value)" class="text-sm px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
                             </div>
-                            <select onchange="atualizarAula(${modIdx}, ${lIdx}, 'type', this.value)" class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
+                            <select onchange="atualizarAula(${modIdx}, ${lIdx}, 'type', this.value); renderizarModulosEditor();" class="text-xs px-2 py-1 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 dark:text-white">
                                 <option value="video" ${lesson.type === 'video' ? 'selected' : ''}>Vídeo</option>
+                                <option value="image" ${lesson.type === 'image' ? 'selected' : ''}>Imagem</option>
                                 <option value="text" ${lesson.type === 'text' ? 'selected' : ''}>Texto</option>
                             </select>
                             <button onclick="removerAula(${modIdx}, ${lIdx})" class="text-red-500 hover:text-red-700">×</button>
@@ -1542,7 +1564,7 @@
         };
         window.atualizarAula = (modIdx, lIdx, field, val) => {
             if (field === 'content') {
-                if (cursoEmEdicao.modules[modIdx].lessons[lIdx].type === 'video') {
+                if (cursoEmEdicao.modules[modIdx].lessons[lIdx].type === 'video' || cursoEmEdicao.modules[modIdx].lessons[lIdx].type === 'image') {
                     cursoEmEdicao.modules[modIdx].lessons[lIdx].url = val;
                 } else {
                     cursoEmEdicao.modules[modIdx].lessons[lIdx].content = val;
@@ -1764,6 +1786,9 @@
                         </span>
                         <h1 class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">${tutorial.title}</h1>
                         <p class="mt-2 text-slate-400">${tutorial.excerpt}</p>
+                        <button onclick="window.print()" id="btn-print-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 transition-colors">
+                            🖨️ Imprimir
+                        </button>
                         ${adminAuth ? `
                         <button id="admin-edit-tutorial" class="mt-4 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-900 hover:bg-emerald-800 text-xs font-medium text-emerald-100 border border-emerald-700">
                             Editar este tutorial
