@@ -408,6 +408,10 @@
             appId: "1:603555084062:web:81a6a28b5e6ac915e83b0f"
         };
 
+        // --- LISTA DE TUTORES / ADMINISTRADORES ---
+        // Coloque aqui o seu email de login para que o sistema saiba que você é o Tutor
+        const ADMIN_EMAILS = ["seu-email@exemplo.com", "admin@lojasnordestina.com.br"];
+
         // Inicializando Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -1019,6 +1023,14 @@
                 
                 if (docSnap.exists()) {
                     const data = docSnap.data();
+                    
+                    // Verifica se é Tutor/Admin pelo email
+                    if (ADMIN_EMAILS.includes(user.email)) {
+                        adminAutenticado = true;
+                        localStorage.setItem('ln_admin_authed', 'true');
+                        atualizarVisibilidadePainelAdmin();
+                    }
+
                     if (data.active === false) {
                         alert("Sua conta foi desativada pelo administrador.");
                         signOut(auth);
@@ -1036,6 +1048,13 @@
                 // Usuário deslogou
                 currentUserData = null;
                 if (estadoAtual.tipo === 'COURSE') {
+                    // Se o admin deslogar, remove acesso
+                    if (adminAutenticado) {
+                        adminAutenticado = false;
+                        localStorage.removeItem('ln_admin_authed');
+                        atualizarVisibilidadePainelAdmin();
+                        closeAdminModal();
+                    }
                     renderizarAreaCursos();
                 }
             }
@@ -1091,7 +1110,7 @@
                             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-4">
                                 <span class="text-3xl">🎓</span>
                             </div>
-                            <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Login do Aluno</h2>
+                            <h2 id="login-title" class="text-2xl font-bold text-slate-800 dark:text-white">Login do Aluno</h2>
                             <p class="text-slate-500 mt-2">Acesse com seu email corporativo ou pessoal cadastrado.</p>
                         </div>
 
@@ -1111,6 +1130,13 @@
                             <button id="btn-show-register" class="text-sm text-emerald-600 hover:underline">Não tem conta? Cadastre-se</button>
                             <br>
                             <button id="btn-forgot-pass" class="text-xs text-slate-400 hover:text-slate-600">Esqueci minha senha</button>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+                            <button id="btn-tutor-toggle" class="text-xs font-medium text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 transition-colors flex items-center justify-center gap-2 mx-auto">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                Sou Tutor / Administrador
+                            </button>
                         </div>
                     </div>
                 `;
@@ -1169,6 +1195,16 @@
                     }
                 });
 
+                // Botão para alternar visualmente para Tutor
+                document.getElementById('btn-tutor-toggle').addEventListener('click', () => {
+                    const title = document.getElementById('login-title');
+                    if (title.textContent.includes('Aluno')) {
+                        title.textContent = 'Acesso do Tutor';
+                        title.classList.add('text-emerald-600');
+                        alert("Dica: Use seu email cadastrado na lista de administradores do código para liberar o painel completo.");
+                    }
+                });
+
             } else {
                 // Dashboard do Aluno Logado
                 let coursesHtml = CURSOS_DATA.map(course => {
@@ -1206,9 +1242,10 @@
 
                 $courseArea.innerHTML = `
                     <div class="flex justify-between items-center mb-6">
-                        <div>
+                        <div class="flex items-center gap-3">
                             <h2 class="text-xl font-bold text-slate-800 dark:text-white">Olá, ${user.name} 👋</h2>
                             <p class="text-sm text-slate-500">Continue seus estudos.</p>
+                            ${adminAutenticado ? '<span class="px-2 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded border border-emerald-200">TUTOR</span>' : ''}
                         </div>
                         <button onclick="logoutCurso()" class="text-sm text-red-500 hover:text-red-400 border border-red-200 dark:border-red-900/30 px-3 py-1 rounded-lg">Sair</button>
                     </div>
