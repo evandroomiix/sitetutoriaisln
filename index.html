@@ -452,6 +452,16 @@
                     <div class="pt-4 border-t border-slate-200 dark:border-slate-700">
                         <button id="btn-save-course" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-lg shadow-emerald-600/20">Salvar Curso Completo</button>
                     </div>
+                    
+                    <!-- Seção da Prova Final -->
+                    <div class="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+                        <h4 class="font-bold text-slate-800 dark:text-white mb-2">Prova Final do Curso 🎓</h4>
+                        <p class="text-xs text-slate-500 mb-2">Esta prova aparecerá como o último passo e só será liberada após o aluno concluir todas as aulas.</p>
+                        <textarea id="edit-course-final-exam" rows="5" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Cole aqui as questões da prova final..."></textarea>
+                        <p class="text-[10px] text-slate-500 mt-1">Formato: Pergunta na linha 1, alternativas nas seguintes. Coloque * na correta. Pule uma linha entre questões.</p>
+                        <button type="button" id="btn-process-final-exam" class="mt-2 text-xs px-3 py-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded text-slate-600 dark:text-slate-300 transition-colors">Salvar Questões da Prova</button>
+                        <span id="final-exam-status" class="text-xs ml-2 text-emerald-600 font-bold"></span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -849,6 +859,8 @@
         const $btnCancelCourse = document.getElementById('btn-cancel-course');
         const $btnSaveCourse = document.getElementById('btn-save-course');
         const $btnAddModule = document.getElementById('btn-add-module');
+        const $editCourseFinalExam = document.getElementById('edit-course-final-exam');
+        const $btnProcessFinalExam = document.getElementById('btn-process-final-exam');
         const $adminTabs = document.getElementById('admin-tabs');
         const $adminForm = document.getElementById('admin-form');
         const $adminStatus = document.getElementById('admin-status');
@@ -1392,6 +1404,11 @@
             // Estrutura no Firestore: users/{uid} -> campo notes (Map): { "courseId_lessonId": "texto" }
             const userNotes = user.notes || {};
 
+            // Verificar progresso total para liberar prova final
+            const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
+            const completedLessons = user.progress && user.progress[courseId] ? user.progress[courseId].length : 0;
+            const isCourseCompleted = totalLessons > 0 && completedLessons >= totalLessons;
+
             // Renderizar Player
             let modulesHtml = course.modules.map((mod, modIdx) => {
                 const lessonsHtml = mod.lessons.map((lesson, lIdx) => {
@@ -1422,6 +1439,23 @@
                     </div>
                 `;
             }).join('');
+
+            // Adicionar Botão da Prova Final (se houver)
+            if (course.finalExam && course.finalExam.length > 0) {
+                modulesHtml += `
+                    <div class="mt-6 px-4 pb-4 border-t border-slate-200 dark:border-slate-800 pt-4">
+                        <button onclick="${isCourseCompleted ? `carregarProvaFinal('${course.id}')` : `alert('🔒 Você precisa concluir todas as aulas para liberar a Prova Final.')`}" class="w-full text-left px-4 py-4 text-sm flex items-center gap-3 border rounded-xl transition-all group shadow-sm ${isCourseCompleted ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 hover:shadow-md cursor-pointer' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 opacity-70 cursor-not-allowed'}">
+                            <div class="w-8 h-8 rounded-full ${isCourseCompleted ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'} flex items-center justify-center flex-shrink-0 text-lg">
+                                ${isCourseCompleted ? '🎓' : '🔒'}
+                            </div>
+                            <div>
+                                <span class="block font-bold ${isCourseCompleted ? 'text-emerald-800 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'}">Prova Final do Curso</span>
+                                <span class="text-xs text-slate-500">${isCourseCompleted ? 'Clique para iniciar' : 'Conclua as aulas para liberar'}</span>
+                            </div>
+                        </button>
+                    </div>
+                `;
+            }
 
             $courseArea.innerHTML = `
                 <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)]">
@@ -1460,6 +1494,82 @@
                     </div>
                 </div>
             `;
+        };
+
+        window.carregarProvaFinal = function(courseId) {
+            const course = CURSOS_DATA.find(c => c.id === courseId);
+            if (!course || !course.finalExam) return;
+
+            const contentArea = document.getElementById('lesson-content-area');
+            const titleArea = document.getElementById('current-lesson-title');
+            const actionsArea = document.getElementById('lesson-actions');
+            const notesArea = document.getElementById('notes-area');
+
+            titleArea.textContent = "Prova Final: " + course.title;
+            actionsArea.innerHTML = ''; // Sem botão de concluir manual
+            notesArea.classList.add('hidden'); // Sem anotações na prova final
+
+            const questions = course.finalExam;
+            
+            const questionsHtml = questions.map((q, idx) => `
+                <div class="mb-6 p-6 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                    <p class="font-bold text-lg text-slate-800 dark:text-white mb-4"><span class="text-emerald-600 mr-2">Questão ${idx + 1}</span> ${q.title}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, optIdx) => `
+                            <div class="flex items-center">
+                                <input type="radio" name="final_q_${idx}" id="final_q_${idx}_${optIdx}" value="${optIdx}" class="quiz-option hidden peer">
+                                <label for="final_q_${idx}_${optIdx}" class="w-full cursor-pointer px-5 py-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-900/20 peer-checked:border-emerald-500 peer-checked:text-emerald-800 dark:peer-checked:text-emerald-300 transition-all font-medium">
+                                    ${opt}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+
+            contentArea.innerHTML = `
+                <div class="w-full max-w-4xl">
+                    <div class="mb-6 p-6 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl text-center">
+                        <h2 class="text-2xl font-bold text-emerald-800 dark:text-emerald-300 mb-2">🎓 Avaliação Final</h2>
+                        <p class="text-emerald-700 dark:text-emerald-400">Responda com atenção. Você precisa de 70% de acerto para receber o certificado.</p>
+                    </div>
+                    <form id="final-exam-form">
+                        ${questionsHtml}
+                        <button type="submit" class="mt-6 w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-lg rounded-xl shadow-lg shadow-emerald-600/20 transition-transform hover:scale-[1.01]">
+                            Finalizar Prova e Enviar
+                        </button>
+                    </form>
+                    <div id="final-exam-result" class="mt-8 hidden"></div>
+                </div>
+            `;
+
+            document.getElementById('final-exam-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                let score = 0;
+                questions.forEach((q, idx) => {
+                    const selected = document.querySelector(`input[name="final_q_${idx}"]:checked`);
+                    if (selected && parseInt(selected.value) === q.correct) score++;
+                });
+
+                const percent = Math.round((score / questions.length) * 100);
+                const resultDiv = document.getElementById('final-exam-result');
+                resultDiv.classList.remove('hidden');
+                
+                const passed = percent >= 70;
+                resultDiv.innerHTML = `
+                    <div class="p-8 rounded-2xl border-2 ${passed ? 'bg-green-50 border-green-500 text-green-900' : 'bg-red-50 border-red-500 text-red-900'} text-center">
+                        <div class="text-6xl mb-4">${passed ? '🏆' : '😕'}</div>
+                        <h3 class="font-bold text-3xl mb-2">${passed ? 'Aprovado!' : 'Não foi dessa vez'}</h3>
+                        <p class="text-xl mb-4">Você acertou <strong>${score}/${questions.length}</strong> (${percent}%).</p>
+                        ${passed ? '<p class="font-bold text-emerald-700">Parabéns! Você concluiu este curso com sucesso.</p>' : '<button onclick="carregarProvaFinal(\''+courseId+'\')" class="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500">Tentar Novamente</button>'}
+                    </div>
+                `;
+                
+                if (passed) {
+                    // Aqui poderia salvar o status de "Curso Concluído" no Firebase
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
         };
 
         window.carregarAula = function(courseId, lessonId) {
@@ -1704,13 +1814,25 @@
                 title: "",
                 excerpt: "",
                 cover: "",
-                modules: []
+                modules: [],
+                finalExam: []
             };
 
             document.getElementById('editor-course-header').textContent = curso ? 'Editar Curso' : 'Novo Curso';
             document.getElementById('edit-course-title').value = cursoEmEdicao.title;
             document.getElementById('edit-course-excerpt').value = cursoEmEdicao.excerpt;
             document.getElementById('edit-course-cover').value = cursoEmEdicao.cover;
+            
+            // Limpar/Preencher campo de prova final
+            if ($editCourseFinalExam) {
+                $editCourseFinalExam.value = '';
+                const statusSpan = document.getElementById('final-exam-status');
+                if (statusSpan) statusSpan.textContent = '';
+                
+                if (cursoEmEdicao.finalExam && cursoEmEdicao.finalExam.length > 0) {
+                    if (statusSpan) statusSpan.textContent = `${cursoEmEdicao.finalExam.length} questões já cadastradas (ocultas). Cole novas para substituir.`;
+                }
+            }
 
             renderizarModulosEditor();
 
@@ -1809,32 +1931,34 @@
             }
         };
 
-        // Função de Importação Inteligente de Quiz
-        window.importarQuizTexto = (modIdx, lIdx, text) => {
-            if (!text.trim()) return;
-            
+        // Função auxiliar para processar texto de quiz (usada no editor de aula e prova final)
+        function processarTextoQuiz(text) {
+            if (!text.trim()) return [];
             const questions = [];
-            const blocks = text.split(/\n\s*\n/); // Separa por linhas vazias
-            
+            const blocks = text.split(/\n\s*\n/);
             blocks.forEach(block => {
                 const lines = block.split('\n').map(l => l.trim()).filter(l => l);
                 if (lines.length < 2) return;
-                
-                const qTitle = lines[0].replace(/^\d+[\.\)]\s*/, ''); // Remove "1. "
+                const qTitle = lines[0].replace(/^\d+[\.\)]\s*/, '');
                 const options = [];
                 let correct = 0;
-                
                 for (let i = 1; i < lines.length; i++) {
                     let opt = lines[i];
                     const isCorrect = opt.startsWith('*');
                     if (isCorrect) opt = opt.substring(1).trim();
-                    opt = opt.replace(/^[a-z][\.\)]\s*/i, ''); // Remove "a) "
+                    opt = opt.replace(/^[a-z][\.\)]\s*/i, '');
                     options.push(opt);
                     if (isCorrect) correct = options.length - 1;
                 }
                 questions.push({ title: qTitle, options, correct });
             });
+            return questions;
+        }
 
+        // Função de Importação Inteligente de Quiz
+        window.importarQuizTexto = (modIdx, lIdx, text) => {
+            const questions = processarTextoQuiz(text);
+            if (questions.length === 0) return;
             // Salva como JSON no content
             cursoEmEdicao.modules[modIdx].lessons[lIdx].content = JSON.stringify(questions);
             alert(`${questions.length} questões importadas com sucesso!`);
@@ -1854,6 +1978,15 @@
             cursoEmEdicao.title = document.getElementById('edit-course-title').value;
             cursoEmEdicao.excerpt = document.getElementById('edit-course-excerpt').value;
             cursoEmEdicao.cover = document.getElementById('edit-course-cover').value;
+            
+            // Salvar Prova Final (se houver texto não processado, tenta processar)
+            const finalExamText = $editCourseFinalExam.value;
+            if (finalExamText.trim()) {
+                const questions = processarTextoQuiz(finalExamText);
+                if (questions.length > 0) {
+                    cursoEmEdicao.finalExam = questions;
+                }
+            }
 
             try {
                 if (cursoEmEdicao.id) {
@@ -1873,6 +2006,16 @@
                 alert("Erro ao salvar: " + e.message);
             }
         });
+
+        // Listener para processar prova final no editor
+        if ($btnProcessFinalExam) {
+            $btnProcessFinalExam.addEventListener('click', () => {
+                const text = $editCourseFinalExam.value;
+                const questions = processarTextoQuiz(text);
+                cursoEmEdicao.finalExam = questions;
+                document.getElementById('final-exam-status').textContent = `${questions.length} questões salvas!`;
+            });
+        }
 
         // Função para renderizar o detalhe de um tutorial
         window.tutorialEmEdicaoId = null;
