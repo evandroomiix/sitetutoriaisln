@@ -275,26 +275,15 @@
                 </div>
             </div>
 
-            <div id="admin-login" class="mt-4 space-y-3 hidden">
-                <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Faça login para acessar o painel de cadastro de tutoriais.
-                </p>
-                <div class="grid gap-3 md:grid-cols-3 items-end">
-                    <div>
-                        <label for="admin-user" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Usuário</label>
-                        <input id="admin-user" type="text" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="ex: admin" />
-                    </div>
-                    <div>
-                        <label for="admin-password" class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Senha</label>
-                        <input id="admin-password" type="password" class="w-full bg-slate-50 dark:bg-emerald-950 border border-slate-300 dark:border-emerald-800 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-green-500" />
-                    </div>
-                    <div>
-                        <button id="admin-login-btn" class="w-full px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors">
-                            Entrar
-                        </button>
-                    </div>
+            <!-- Mensagem para usuários não autenticados como admin -->
+            <div id="admin-login" class="mt-4 space-y-3 hidden text-center p-8">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+                    <span class="text-2xl">🔒</span>
                 </div>
-                <p id="admin-login-status" class="text-xs text-red-400"></p>
+                <h3 class="font-bold text-lg text-slate-800 dark:text-white">Acesso Restrito</h3>
+                <p class="text-slate-500 mt-2 max-w-sm mx-auto">
+                    Para acessar o painel, faça login como Tutor na área de <a href="#" onclick="document.querySelector('[data-type=COURSE]').click(); closeAdminModal();" class="text-emerald-500 underline font-medium">Cursos Internos</a>.
+                </p>
             </div>
             <div id="admin-content-panel" class="mt-4 space-y-4 hidden">
                 <!-- Configuração do Token GitHub -->
@@ -410,7 +399,7 @@
 
         // --- LISTA DE TUTORES / ADMINISTRADORES ---
         // Coloque aqui o seu email de login para que o sistema saiba que você é o Tutor
-        const ADMIN_EMAILS = ["evandroomiix.lc@gmail.com", "ti@lojasnordestina.com.br"];
+        const ADMIN_EMAILS = ["seu-email@exemplo.com", "admin@lojasnordestina.com.br"];
 
         // Inicializando Firebase
         const app = initializeApp(firebaseConfig);
@@ -766,10 +755,6 @@
         const $adminSection = document.getElementById('admin-section');
         const $adminLogout = document.getElementById('admin-logout');
         const $adminLogin = document.getElementById('admin-login');
-        const $adminLoginUser = document.getElementById('admin-user');
-        const $adminLoginPassword = document.getElementById('admin-password');
-        const $adminLoginBtn = document.getElementById('admin-login-btn');
-        const $adminLoginStatus = document.getElementById('admin-login-status');
         const $adminContentPanel = document.getElementById('admin-content-panel');
         const $adminUsersPanel = document.getElementById('admin-users-panel');
         const $adminTabs = document.getElementById('admin-tabs');
@@ -1630,13 +1615,17 @@
 
             // Checa autenticação e mostra o painel correto
             if (adminAutenticado) {
-                if ($adminContentPanel) $adminContentPanel.classList.remove('hidden');
+                if ($adminContentPanel) $adminContentPanel.classList.remove('hidden'); // Mostra painel de conteúdo
                 if ($adminLogin) $adminLogin.classList.add('hidden');
                 if ($adminLogout) $adminLogout.classList.remove('hidden');
                 if ($adminTabs) $adminTabs.classList.remove('hidden');
+                // Garante que a aba de conteúdo esteja selecionada por padrão
+                if (document.querySelector('[data-tab="content"]')) document.querySelector('[data-tab="content"]').click();
             } else {
+                // Se não for admin, mostra a mensagem de acesso restrito
                 if ($adminContentPanel) $adminContentPanel.classList.add('hidden');
-                if ($adminLogin) $adminLogin.classList.remove('hidden');
+                if ($adminUsersPanel) $adminUsersPanel.classList.add('hidden');
+                if ($adminLogin) $adminLogin.classList.remove('hidden'); // Mostra a mensagem de "Acesso Restrito"
                 if ($adminLogout) $adminLogout.classList.add('hidden');
                 if ($adminTabs) $adminTabs.classList.add('hidden');
             }
@@ -1799,55 +1788,15 @@
             });
         }
 
-        if ($adminLoginBtn) {
-            $adminLoginBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                const user = ($adminLoginUser?.value || '').trim();
-                const pass = ($adminLoginPassword?.value || '').trim();
-
-                // Credenciais simples; ajuste se quiser outros valores
-                const USER_OK = 'admin';
-                const PASS_OK = 'ln2025!';
-
-                if (user === USER_OK && pass === PASS_OK) {
-                    adminAutenticado = true;
-                    try {
-                        localStorage.setItem('ln_admin_authed', 'true');
-                    } catch (err) {}
-
-                    if ($adminLoginStatus) {
-                        $adminLoginStatus.textContent = 'Login realizado com sucesso.';
-                        $adminLoginStatus.classList.remove('text-red-400');
-                        $adminLoginStatus.classList.add('text-green-400');
-                    }
-
-                    openAdminModal(); // Reavalia o que mostrar dentro do modal já aberto
-                    atualizarVisibilidadePainelAdmin();
-                    renderizarTabelaUsuarios();
-                } else {
-                    if ($adminLoginStatus) {
-                        $adminLoginStatus.textContent = 'Usuário ou senha incorretos.';
-                        $adminLoginStatus.classList.remove('text-green-400');
-                        $adminLoginStatus.classList.add('text-red-400');
-                    }
-                }
-            });
-        }
-
         if ($adminLogout) {
             $adminLogout.addEventListener('click', () => {
                 adminAutenticado = false;
                 try {
                     localStorage.removeItem('ln_admin_authed');
                 } catch (err) {}
-                if ($adminLoginStatus) {
-                    $adminLoginStatus.textContent = '';
-                }
                 if ($adminStatus) {
                     $adminStatus.textContent = '';
                 }
-                if ($adminLoginUser) $adminLoginUser.value = '';
-                if ($adminLoginPassword) $adminLoginPassword.value = '';
                 
                 closeAdminModal();
                 atualizarVisibilidadePainelAdmin();
