@@ -143,8 +143,9 @@
             <div class="flex-1 max-w-md mx-4">
                 <div class="relative">
                     <input
-                        type="text"
+                            type="search"
                         id="search-input"
+                            name="search"
                         placeholder="Buscar tutoriais..."
                         autocomplete="off"
                         class="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg pl-10 pr-4 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
@@ -313,7 +314,7 @@
                     <h3 class="text-sm font-bold text-slate-800 dark:text-white mb-2">⚙️ Configuração de Sincronização</h3>
                     <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Para salvar automaticamente no GitHub, insira seu Token de Acesso Pessoal (Classic) abaixo uma única vez.</p>
                     <div class="flex gap-2">
-                        <input id="github-token-input" type="password" class="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-3 py-1 text-sm text-slate-800 dark:text-white focus:outline-none focus:border-green-500" placeholder="Cole seu Token aqui (ghp_...)" />
+                        <input id="github-token-input" type="password" autocomplete="new-password" class="flex-1 bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded px-3 py-1 text-sm text-slate-800 dark:text-white focus:outline-none focus:border-green-500" placeholder="Cole seu Token aqui (ghp_...)" />
                         <button id="save-token-btn" type="button" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-medium transition-colors">Salvar Token</button>
                     </div>
                     <p id="token-status" class="text-xs mt-2 text-slate-500"></p>
@@ -1222,11 +1223,11 @@
                         <form id="course-login-form" class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                                <input type="email" id="c-email" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                                <input type="email" id="c-email" name="email" autocomplete="username" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Senha</label>
-                                <input type="password" id="c-pass" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
+                                <input type="password" id="c-pass" name="password" autocomplete="current-password" class="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none" required>
                             </div>
                             <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-emerald-600/20">Entrar</button>
                         </form>
