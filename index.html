@@ -2330,6 +2330,9 @@
                 </div>
             `;
             
+            // Inicializar leitores de PDF após renderizar o HTML da tela de detalhes
+            setTimeout(() => window.iniciarPdfs(), 100);
+
             // Adiciona o listener de exclusão aqui também, para o botão dentro do detalhe
             if (canEdit) {
                 const $editBtn = document.getElementById('admin-edit-tutorial');
