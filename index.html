@@ -2228,9 +2228,22 @@
                         </div>
                     `);
                 } else if (lower.endsWith('.pdf')) {
+                    const pdfId = 'pdf_' + Math.random().toString(36).substr(2, 9);
                     partes.push(`
-                        <div class="mb-6">
-                            <iframe src="${mediaUrl}" class="w-full h-96 rounded-xl border border-emerald-800 bg-black"></iframe>
+                        <div class="mb-6 pdf-presentation-container" data-pdf-url="${mediaUrl}" data-pdf-id="${pdfId}">
+                            <div class="bg-slate-900 rounded-xl border border-emerald-800 p-4 text-center shadow-xl">
+                                <div class="flex justify-between items-center mb-4 text-slate-300 bg-slate-800 p-2 rounded-lg">
+                                    <button onclick="mudarPaginaPdf('${pdfId}', -1)" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-sm font-medium transition-colors">← Voltar</button>
+                                    <span class="text-sm font-bold">Slide <span id="page-num-${pdfId}">1</span> de <span id="page-count-${pdfId}">?</span></span>
+                                    <button onclick="mudarPaginaPdf('${pdfId}', 1)" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-sm font-medium transition-colors">Avançar →</button>
+                                </div>
+                                <div class="flex justify-center overflow-auto bg-black/50 rounded-lg p-2 min-h-[400px] items-center">
+                                    <canvas id="pdf-canvas-${pdfId}" class="max-w-full h-auto drop-shadow-2xl"></canvas>
+                                </div>
+                                <div class="mt-4 text-xs text-slate-500 flex justify-center gap-4">
+                                    <a href="${mediaUrl}" target="_blank" class="hover:text-emerald-400 hover:underline flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Baixar Arquivo Original</a>
+                                </div>
+                            </div>
                         </div>
                     `);
                 } else if (mediaUrl.includes('drive.google.com')) {
@@ -2993,6 +3006,28 @@
             if (window.innerWidth >= 768) {
                 // Em desktop, sempre mostra o sidebar e remove overlay
                 $sidebar.classList.remove('-translate-x-full');
+                $sidebarOverlay.classList.add('hidden');
+            } else {
+                // Em mobile, garante que o overlay esteja sincronizado com o estado do sidebar
+                const isSidebarOpen = !$sidebar.classList.contains('-translate-x-full');
+                $sidebarOverlay.classList.toggle('hidden', !isSidebarOpen);
+            }
+        });
+
+    </script>
+</body>
+</html>
+                $sidebarOverlay.classList.add('hidden');
+            } else {
+                // Em mobile, garante que o overlay esteja sincronizado com o estado do sidebar
+                const isSidebarOpen = !$sidebar.classList.contains('-translate-x-full');
+                $sidebarOverlay.classList.toggle('hidden', !isSidebarOpen);
+            }
+        });
+
+    </script>
+</body>
+</html>
                 $sidebarOverlay.classList.add('hidden');
             } else {
                 // Em mobile, garante que o overlay esteja sincronizado com o estado do sidebar
