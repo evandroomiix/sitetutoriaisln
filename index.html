@@ -2772,6 +2772,44 @@
             });
         }
 
+        // --- LÓGICA DE UPLOAD DE ARQUIVOS (FIREBASE STORAGE) ---
+        if ($adminMediaUpload) {
+            $adminMediaUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Mostra a mensagem de progresso
+                $uploadStatus.textContent = '⏳ Fazendo upload... 0%';
+                $uploadStatus.classList.remove('hidden');
+                $uploadStatus.className = 'text-xs mt-1 text-blue-500 dark:text-blue-400 font-medium';
+
+                // Cria um nome único e seguro para o arquivo
+                const fileName = `tutoriais/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+                const fileRef = storageRef(storage, fileName);
+
+                const uploadTask = uploadBytesResumable(fileRef, file);
+
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        $uploadStatus.textContent = `⏳ Fazendo upload... ${Math.round(progress)}%`;
+                    }, 
+                    (error) => {
+                        console.error('Erro no upload:', error);
+                        $uploadStatus.textContent = '❌ Erro ao fazer upload: ' + error.message;
+                        $uploadStatus.className = 'text-xs mt-1 text-red-500 dark:text-red-400 font-medium';
+                    }, 
+                    async () => {
+                        // Pega o link definitivo e cola no campo
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        $adminMediaUrl.value = downloadURL;
+                        $uploadStatus.textContent = '✅ Upload concluído! Link gerado automaticamente.';
+                        $uploadStatus.className = 'text-xs mt-1 text-green-600 dark:text-green-400 font-medium';
+                    }
+                );
+            });
+        }
+
         if ($adminForm) {
             $adminForm.addEventListener('submit', (e) => {
                 e.preventDefault();
